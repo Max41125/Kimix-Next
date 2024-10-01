@@ -1,10 +1,9 @@
 "use client"; // Поскольку мы работаем с роутингом на клиенте
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation'; // Используем useSearchParams для работы с query-параметрами
 import Header from '@/app/components/Header';
 import Loader from '@/app/components/Loader';
-import ChemicalClientComponent from '@/app/components/ChemicalClientComponent';
 
 const ChemicalDetail = () => {
   const searchParams = useSearchParams(); // Получаем доступ к параметрам запроса
@@ -47,12 +46,15 @@ const ChemicalDetail = () => {
         <p>CAS: {chemical.cas_number}</p>
         <p>Formula: {chemical.formula}</p>
         <p>Molecular Weight: {chemical.molecular_weight}</p>
-        
-        {/* Отображение клиентского компонента с данными химического вещества */}
-        <ChemicalClientComponent chemical={chemical} />
       </div>
     </>
   );
 };
 
-export default ChemicalDetail;
+export default function ChemicalPage() {
+  return (
+    <Suspense fallback={<Loader />}>
+      <ChemicalDetail />
+    </Suspense>
+  );
+}
