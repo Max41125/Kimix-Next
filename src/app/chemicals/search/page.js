@@ -1,22 +1,19 @@
-// app/chemicals/search/page.js
-"use client"; // Убедитесь, что это добавлено
+"use client"; // Поскольку мы работаем с роутингом на клиенте
 
-import React, { useEffect, useState } from 'react';
-import ChemicalList from '@/app/components/ChemicalList';
+import React, { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation'; // Используем useSearchParams для работы с query-параметрами
 import Header from '@/app/components/Header';
-import Loader from '@/app/components/Loader'; 
-import { useSearchParams } from 'next/navigation'; // Импортируйте useSearchParams
+import Loader from '@/app/components/Loader';
+import ChemicalList from '@/app/components/ChemicalList';
 
-const SearchPage = () => {
-  const searchParams = useSearchParams(); // Получаем параметры запроса
-  const query = searchParams.get('query'); // Извлекаем запрос из параметров
+const ChemicalDetail = ({ query }) => {
   const [chemicalList, setChemicalList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchChemicals = async () => {
-      if (!query) return; // Проверяем, есть ли запрос
+      if (!query) return;
 
       try {
         const res = await fetch(`https://test.kimix.space/api/chemicals/search?q=${encodeURIComponent(query)}`);
@@ -33,17 +30,30 @@ const SearchPage = () => {
     };
 
     fetchChemicals();
-  }, [query]); // Запускаем эффект при изменении query
+  }, [query]);
 
   if (loading) return <Loader />;
   if (error) return <div>Ошибка: {error}</div>;
 
+  return <ChemicalList chemicals={chemicalList} />;
+};
+
+const SearchPage = () => {
   return (
     <>
       <Header />
-      <ChemicalList chemicals={chemicalList} />
+      <Suspense fallback={<Loader />}>
+        <ChemicalDetailWithParams />
+      </Suspense>
     </>
   );
+};
+
+const ChemicalDetailWithParams = () => {
+  const searchParams = useSearchParams();
+  const query = searchParams.get('query');
+
+  return <ChemicalDetail query={query} />;
 };
 
 export default SearchPage;
