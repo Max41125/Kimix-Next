@@ -22,14 +22,14 @@ const ChemicalList = ({ chemicals }) => { // Измените на chemicals
               className="w-20 h-20"
             />
           </div>
-          <Link href={`/chemical/${chemical.id}`}>
+          <Link href={`/chemical?id=${chemical.id}`}>
             <h3 className="text-lg font-bold">{chemical.title}</h3>
           </Link>
           <p className="text-left">CAS: {chemical.cas_number}</p>
           <p className="text-left">Formula: {chemical.formula}</p>
           <p className="text-left">Molecular Weight: {chemical.molecular_weight}</p>
           <Link 
-            href={`/chemical/${chemical.id}`} 
+            href={`/chemical?id=${chemical.id}`} 
             className="mt-2 bg-teal-500 text-white rounded py-2 px-4 hover:bg-teal-600"
           >
             Подробнее
