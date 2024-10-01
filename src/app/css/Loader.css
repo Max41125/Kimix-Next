@@ -1,0 +1,85 @@
+/* Loader.css */
+.loader-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8); /* Полупрозрачный белый фон */
+    backdrop-filter: blur(10px); /* Размытие фона */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Убедитесь, что загрузчик поверх всего */
+  }
+  
+  .loader {
+    border: 8px solid rgba(255, 255, 255, 0.3); /* Цвет и прозрачность */
+    border-top: 8px solid #14D8B5; /* Цвет верха индикатора загрузки */
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite; /* Крутится */
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .circles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none; /* Игнорировать события мыши */
+  }
+  
+  .circle {
+    position: absolute;
+    border-radius: 50%;
+    animation: move 8s linear infinite;
+  }
+  
+  @keyframes move {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-30px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+  
+  /* Разные цвета и размеры для кругов */
+  .circle1 {
+    background-color: rgba(20, 216, 181, 0.6);
+    width: 50px;
+    height: 50px;
+    top: 10%;
+    left: 20%;
+    animation-delay: 0s;
+  }
+  
+  .circle2 {
+    background-color: rgba(0, 123, 255, 0.6);
+    width: 40px;
+    height: 40px;
+    top: 30%;
+    left: 60%;
+    animation-delay: 1s;
+  }
+  
+  .circle3 {
+    background-color: rgba(255, 0, 0, 0.6);
+    width: 30px;
+    height: 30px;
+    top: 50%;
+    left: 40%;
+    animation-delay: 2s;
+  }
+  
