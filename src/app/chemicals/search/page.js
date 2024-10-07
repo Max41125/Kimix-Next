@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'; // Используем useSe
 import Header from '@/app/components/Module/Header';
 import Loader from '@/app/components/Loader';
 import ChemicalList from '@/app/components/Chemicals/ChemicalList';
-
+import { UserProvider } from './components/Auth/UserProvider';
 const ChemicalDetail = ({ query }) => {
   const [chemicalList, setChemicalList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,10 +41,13 @@ const ChemicalDetail = ({ query }) => {
 const SearchPage = () => {
   return (
     <>
+     <UserProvider>
       <Header />
+      </UserProvider>
       <Suspense fallback={<Loader />}>
         <ChemicalDetailWithParams />
       </Suspense>
+      
     </>
   );
 };

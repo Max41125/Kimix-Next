@@ -4,6 +4,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation'; // Используем useSearchParams для работы с query-параметрами
 import Header from '@/app/components/Module/Header';
 import Loader from '@/app/components/Loader';
+import { UserProvider } from './components/Auth/UserProvider';
 
 const ChemicalDetail = () => {
   const searchParams = useSearchParams(); // Получаем доступ к параметрам запроса
@@ -40,7 +41,9 @@ const ChemicalDetail = () => {
 
   return (
     <>
+     <UserProvider>
       <Header />
+      </UserProvider>
       <div className="container mx-auto">
         <h2>{chemical.title}</h2>
         <p>CAS: {chemical.cas_number}</p>
