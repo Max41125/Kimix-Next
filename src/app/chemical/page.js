@@ -4,7 +4,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation'; // Используем useSearchParams для работы с query-параметрами
 import Header from '@/app/components/Module/Header';
 import Loader from '@/app/components/Loader';
-import { UserProvider } from './components/Auth/UserProvider';
+import { UserProvider } from '@/app/components/Auth/UserProvider';
 
 const ChemicalDetail = () => {
   const searchParams = useSearchParams(); // Получаем доступ к параметрам запроса
