@@ -2,9 +2,9 @@
 
 import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation'; // Используем useSearchParams для работы с query-параметрами
-import Header from '@/app/components/Header';
+import Header from '@/app/components/Module/Header';
 import Loader from '@/app/components/Loader';
-import ChemicalList from '@/app/components/ChemicalList';
+import ChemicalList from '@/app/components/Chemicals/ChemicalList';
 
 const ChemicalDetail = ({ query }) => {
   const [chemicalList, setChemicalList] = useState([]);

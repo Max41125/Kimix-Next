@@ -1,12 +1,16 @@
-// src/app/page.js
 
-import Header from "./components/Header"; // импортируем Header
 
+import Header from "./components/Module/Header"; // импортируем Header
+import { UserProvider } from './components/Auth/UserProvider';
 
 export default function Home() {
   return (
     <main >
-      <Header /> 
+      <UserProvider>
+        <Header /> 
+
+      </UserProvider>
+      
 
     </main>
   );
