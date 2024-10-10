@@ -8,17 +8,25 @@ export const UserProvider = ({ children }) => {
     const [token, setToken] = useState('');
 
     useEffect(() => {
+        
+        const getCsrfToken = async () => {
+            try {
+                const response = await fetch('https://test.kimix.space/sanctum/csrf-cookie', {
+                    credentials: 'include' // Включаем куки в запрос
+                });
 
-            const getCsrfToken = async () => {
-              try {
-                await fetch('https://test.kimix.space/sanctum/csrf-cookie');
-              } catch (error) {
+                // Проверяем, установлен ли токен
+                if (!response.ok) {
+                    console.error('Ошибка получения CSRF токена:', response.statusText);
+                } else {
+                    console.log('CSRF токен успешно получен');
+                }
+            } catch (error) {
                 console.error('Ошибка получения CSRF токена:', error);
-              }
-            };
-          
-            getCsrfToken();
- 
+            }
+        };
+
+        getCsrfToken();
 
 
         if (typeof window !== 'undefined') {
