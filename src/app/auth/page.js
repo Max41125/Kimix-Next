@@ -39,7 +39,7 @@ const AuthPage = () => {
         const token = data.cookies.find(cookie => cookie.startsWith('XSRF-TOKEN='));
         if (token) {
           const tokenValue = token.split(';')[0].split('=')[1]; // Извлекаем только значение токена
-          setCsrfToken(tokenValue);
+          setCsrfToken(decodeURIComponent(tokenValue));
         }
       } else {
         console.error('Failed to fetch CSRF token:', response.statusText);
