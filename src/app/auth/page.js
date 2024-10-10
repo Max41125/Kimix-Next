@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/app/components/Module/Header';
 import { UserProvider } from '@/app/components/Auth/UserProvider';
 import { CiCircleCheck } from "react-icons/ci"; 
@@ -10,6 +10,7 @@ import Link from "next/link";
 
 const AuthPage = () => {
   const router = useRouter(); // Инициализация useRouter
+  const [csrfToken, setCsrfToken] = useState(null);
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -24,6 +25,37 @@ const AuthPage = () => {
   const handleRoleChange = (selectedRole) => {
     setRole(selectedRole);
   };
+
+
+  const fetchCsrfToken = async () => {
+    try {
+      const response = await fetch('/api/csrf-token', { // Измените URL на путь к вашему API
+        method: 'GET',
+        credentials: 'include',
+      });
+  
+      if (response.ok) {
+        const data = await response.json(); // Получаем JSON из ответа
+        const token = data.cookies.find(cookie => cookie.startsWith('XSRF-TOKEN='));
+        if (token) {
+          const tokenValue = token.split(';')[0].split('=')[1]; // Извлекаем только значение токена
+          setCsrfToken(tokenValue);
+        }
+      } else {
+        console.error('Failed to fetch CSRF token:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching CSRF token:', error);
+    }
+  };
+
+  useEffect(() => {
+
+      fetchCsrfToken();
+
+    }, []);
+
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -49,7 +81,7 @@ const AuthPage = () => {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'X-CSRF-TOKEN': document.cookie.match(/XSRF-TOKEN=([^;]*)/)?.[1] || ''
+          'X-CSRF-TOKEN': csrfToken || ''
         },
         body: JSON.stringify({
           email,
@@ -89,7 +121,7 @@ const AuthPage = () => {
           headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
-              'X-CSRF-TOKEN': document.cookie.match(/XSRF-TOKEN=([^;]*)/)?.[1] || ''
+              'X-CSRF-TOKEN': csrfToken || ''
           },
           body: JSON.stringify({
               email,

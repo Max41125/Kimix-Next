@@ -15,7 +15,7 @@ const Header = () => {
   const [isLoginMode, setIsLoginMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDropdownOpen, setDropdownOpen] = useState(false); 
-  console.log(user);
+
   const toggleModal = () => {
     setModalOpen(!isModalOpen);
   };

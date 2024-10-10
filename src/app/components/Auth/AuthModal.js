@@ -4,9 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { RxCross1 } from 'react-icons/rx';
 import { useUser } from '../Auth/UserProvider';
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie'; // Импорт библиотеки js-cookie
 
-const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
 
+const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode, initialCsrfToken }) => {
+  const [csrfToken, setCsrfToken] = useState(null);
   const [email, setEmail] = useState('');
   const { login } = useUser();
   const [name, setName] = useState('');
@@ -18,6 +20,31 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
   const [errors, setErrors] = useState({}); // Состояние для хранения ошибок
   const router = useRouter();
   
+// Функция для получения CSRF токена
+const fetchCsrfToken = async () => {
+  try {
+    const response = await fetch('/api/csrf-token', { // Измените URL на путь к вашему API
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (response.ok) {
+      const data = await response.json(); // Получаем JSON из ответа
+      const token = data.cookies.find(cookie => cookie.startsWith('XSRF-TOKEN='));
+      if (token) {
+        const tokenValue = token.split(';')[0].split('=')[1]; // Извлекаем только значение токена
+        setCsrfToken(tokenValue);
+      }
+    } else {
+      console.error('Failed to fetch CSRF token:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error fetching CSRF token:', error);
+  }
+};
+
+
+
   const handleOutsideClick = (event) => {
     const modal = document.getElementById('modal');
     if (modal && !modal.contains(event.target)) {
@@ -28,13 +55,20 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
   useEffect(() => {
     if (isOpen) {
       window.addEventListener('mousedown', handleOutsideClick);
+      fetchCsrfToken();
     } else {
       window.removeEventListener('mousedown', handleOutsideClick);
     }
 
+
     return () => {
       window.removeEventListener('mousedown', handleOutsideClick);
     };
+
+
+
+
+
   }, [isOpen]);
 
   const handleRoleChange = (selectedRole) => {
@@ -85,7 +119,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'X-CSRF-TOKEN': document.cookie.match(/XSRF-TOKEN=([^;]*)/)?.[1] || ''
+          'X-CSRF-TOKEN': csrfToken || ''
         },
         body: JSON.stringify({
           email,
@@ -126,7 +160,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'X-CSRF-TOKEN': document.cookie.match(/XSRF-TOKEN=([^;]*)/)?.[1] || ''
+          'X-CSRF-TOKEN': csrfToken || ''
         },
         body: JSON.stringify({
           email,
@@ -241,6 +275,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
                 </div>
               )}
               {!isLoginMode && (
+                
                 <div className="mb-4 flex space-x-2">
                   <label
                     className={`flex-1 p-2 text-center border rounded ${role === 'buyer' ? 'bg-green-500 text-white' : ''}`}
@@ -265,7 +300,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
                   </label>
                 </div>
               )}
-
+              
               {errors.role && <p className="text-red-500 text-sm">{errors.role}</p>}
               {errors.network && <p className="text-red-500 text-sm">{errors.network}</p>}
 
