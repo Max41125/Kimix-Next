@@ -4,13 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { RxCross1 } from 'react-icons/rx';
 import { useUser } from '../Auth/UserProvider';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie'; // Импорт библиотеки js-cookie
 
 
-const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode, initialCsrfToken }) => {
-  const [csrfToken, setCsrfToken] = useState(null);
+
+const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
+
   const [email, setEmail] = useState('');
-  const { login } = useUser();
+  const { login, csrfToken } = useUser();
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -21,27 +21,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode, initialCsrfTo
   const router = useRouter();
   
 // Функция для получения CSRF токена
-const fetchCsrfToken = async () => {
-  try {
-    const response = await fetch('/api/csrf-token', { // Измените URL на путь к вашему API
-      method: 'GET',
-      credentials: 'include',
-    });
 
-    if (response.ok) {
-      const data = await response.json(); // Получаем JSON из ответа
-      const token = data.cookies.find(cookie => cookie.startsWith('XSRF-TOKEN='));
-      if (token) {
-        const tokenValue = token.split(';')[0].split('=')[1]; // Извлекаем только значение токена
-        setCsrfToken(decodeURIComponent(tokenValue));
-      }
-    } else {
-      console.error('Failed to fetch CSRF token:', response.statusText);
-    }
-  } catch (error) {
-    console.error('Error fetching CSRF token:', error);
-  }
-};
 
 
 
@@ -55,7 +35,7 @@ const fetchCsrfToken = async () => {
   useEffect(() => {
     if (isOpen) {
       window.addEventListener('mousedown', handleOutsideClick);
-      fetchCsrfToken();
+
     } else {
       window.removeEventListener('mousedown', handleOutsideClick);
     }

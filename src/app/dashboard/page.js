@@ -6,7 +6,7 @@ const App = () => {
     
     return (
         <>
-        <UserProvider>
+        <UserProvider >
             <Header />
 
             <Dashboard />

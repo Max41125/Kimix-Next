@@ -3,21 +3,24 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 
 const UserContext = createContext();
 
-export const UserProvider = ({ children }) => {
+export const UserProvider = ({ children, csrfToken }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState('');
 
     useEffect(() => {
+        
 
-
+        
 
         if (typeof window !== 'undefined') {
+
             const storedToken = localStorage.getItem('token');
             const storedUser = JSON.parse(localStorage.getItem('user')); // Предполагаем, что вы также сохраняете пользователя
             setToken(storedToken || '');
             setUser(storedUser); // Устанавливаем пользователя из localStorage
         }
     }, []);
+
 
 
 
@@ -58,7 +61,7 @@ export const UserProvider = ({ children }) => {
     
 
     return (
-        <UserContext.Provider value={{ user, token, login, logout  }}>
+        <UserContext.Provider value={{ user, token, login, logout, csrfToken  }}>
             {children}
         </UserContext.Provider>
     );
