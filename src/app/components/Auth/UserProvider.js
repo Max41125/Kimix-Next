@@ -8,7 +8,19 @@ export const UserProvider = ({ children }) => {
     const [token, setToken] = useState('');
 
     useEffect(() => {
-        // Проверяем, находимся ли мы на клиенте
+
+            const getCsrfToken = async () => {
+              try {
+                await fetch('https://test.kimix.space/sanctum/csrf-cookie');
+              } catch (error) {
+                console.error('Ошибка получения CSRF токена:', error);
+              }
+            };
+          
+            getCsrfToken();
+ 
+
+
         if (typeof window !== 'undefined') {
             const storedToken = localStorage.getItem('token');
             const storedUser = JSON.parse(localStorage.getItem('user')); // Предполагаем, что вы также сохраняете пользователя

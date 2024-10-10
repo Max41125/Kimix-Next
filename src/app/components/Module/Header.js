@@ -15,7 +15,7 @@ const Header = () => {
   const [isLoginMode, setIsLoginMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDropdownOpen, setDropdownOpen] = useState(false); 
-  
+  console.log(user);
   const toggleModal = () => {
     setModalOpen(!isModalOpen);
   };
@@ -67,7 +67,8 @@ const Header = () => {
             {/* Выпадающее меню для авторизованного пользователя */}
             {user && isDropdownOpen && (
               <div className="absolute right-0 bg-white shadow-md rounded mt-2 w-48">
-                <Link href="/user" className="block px-4 py-2 hover:bg-gray-200">Личный кабинет</Link>
+                <p>Доброго дня {user.name}</p>
+                <Link href="/dashboard" className="block px-4 py-2 hover:bg-gray-200">Личный кабинет</Link>
                 <button onClick={handleLogout} className="block w-full text-left px-4 py-2 hover:bg-gray-200">Выйти</button>
               </div>
             )}
