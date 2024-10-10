@@ -9,15 +9,12 @@ export const UserProvider = ({ children, csrfToken }) => {
 
     useEffect(() => {
         
-
-        
-
         if (typeof window !== 'undefined') {
 
             const storedToken = localStorage.getItem('token');
-            const storedUser = JSON.parse(localStorage.getItem('user')); // Предполагаем, что вы также сохраняете пользователя
+            const storedUser = JSON.parse(localStorage.getItem('user')); 
             setToken(storedToken || '');
-            setUser(storedUser); // Устанавливаем пользователя из localStorage
+            setUser(storedUser); 
         }
     }, []);
 
