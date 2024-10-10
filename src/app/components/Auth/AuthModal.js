@@ -65,11 +65,6 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
     return () => {
       window.removeEventListener('mousedown', handleOutsideClick);
     };
-
-
-
-
-
   }, [isOpen]);
 
   const handleRoleChange = (selectedRole) => {
