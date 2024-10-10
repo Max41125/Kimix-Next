@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 
 
 const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
-  const [csrfToken, setCsrfToken] = useState(null);
+
   const [email, setEmail] = useState('');
   const { login } = useUser();
   const [name, setName] = useState('');
@@ -20,27 +20,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
   const [errors, setErrors] = useState({}); // Состояние для хранения ошибок
   const router = useRouter();
   
-  const fetchCsrfToken = async () => {
-    try {
-      const response = await fetch('/api/csrf-token', { // Измените URL на путь к вашему API
-        method: 'GET',
-        credentials: 'include',
-      });
-  
-      if (response.ok) {
-        const data = await response.json(); // Получаем JSON из ответа
-        const token = data.cookies.find(cookie => cookie.startsWith('XSRF-TOKEN='));
-        if (token) {
-          const tokenValue = token.split(';')[0].split('=')[1]; // Извлекаем только значение токена
-          setCsrfToken(decodeURIComponent(tokenValue));
-        }
-      } else {
-        console.error('Failed to fetch CSRF token:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error fetching CSRF token:', error);
-    }
-  };
+
 
 
 
@@ -54,7 +34,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
 
   useEffect(() => {
     if (isOpen) {
-      fetchCsrfToken();
+
       window.addEventListener('mousedown', handleOutsideClick);
 
     } else {
@@ -149,14 +129,27 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
   };
 
   const loginUser = async () => {
-    const url = 'https://test.kimix.space/api/auth/login';
+    const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+    const loginUrl = 'https://test.kimix.space/api/auth/login';
+  
     try {
-      const response = await fetch(url, {
+      // Получаем CSRF-токен
+      const csrfResponse = await fetch(csrfUrl, {
+        method: 'GET',
+        credentials: 'include' // Обязательно включите куки
+      });
+  
+      if (!csrfResponse.ok) {
+        throw new Error('Ошибка получения CSRF токена');
+      }
+  
+      // Выполняем вход
+      const response = await fetch(loginUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'X-CSRF-TOKEN': csrfToken || ''
+         
         },
         body: JSON.stringify({
           email,
@@ -164,15 +157,16 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
           remember
         })
       });
-
+  
       const data = await response.json();
+  
       if (response.ok) {
         if (!data.verify) {
           setIsVerificationModalOpen(true);
           return;
         } else {
           console.log('Success:', data);
-          login({ email: data.email, role: data.role, name: data.name, id:data.id }, data.token);
+          login({ email: data.email, role: data.role, name: data.name, id: data.id }, data.token);
           toggleModal();
           router.push('/dashboard'); // Редирект на страницу dashboard
         }
