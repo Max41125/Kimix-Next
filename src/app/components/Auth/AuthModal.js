@@ -134,57 +134,39 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
   
     try {
       // Получаем CSRF-токен
-      const csrfResponse = await fetch(csrfUrl, {
-        method: 'GET',
-        credentials: 'include' // Обязательно включите куки
-      });
+      await axios.get(csrfUrl, { withCredentials: true });
   
-      if (!csrfResponse.ok) {
-        throw new Error('Ошибка получения CSRF токена');
-      }
-  
-      // Выполняем вход
-      const response = await fetch(loginUrl, {
-        method: 'POST',
+      // После получения токена выполняем вход
+      const response = await axios.post(loginUrl, {
+        email,
+        password,
+        remember
+      }, {
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-         
+          'X-CSRF-TOKEN': Cookie.get('XSRF-TOKEN') // Используем токен
         },
-        body: JSON.stringify({
-          email,
-          password,
-          remember
-        })
+        withCredentials: true // Обязательно
       });
   
-      const data = await response.json();
+      const data = response.data;
   
-      if (response.ok) {
-        if (!data.verify) {
-          setIsVerificationModalOpen(true);
-          return;
-        } else {
-          console.log('Success:', data);
-          login({ email: data.email, role: data.role, name: data.name, id: data.id }, data.token);
-          toggleModal();
-          router.push('/dashboard'); // Редирект на страницу dashboard
-        }
+      if (data.verify) {
+        console.log('Success:', data);
+        login({ email: data.email, role: data.role, name: data.name, id: data.id }, data.token);
+        toggleModal();
+        router.push('/dashboard'); // Редирект на страницу dashboard
       } else {
-        console.error('Error:', data);
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          ...data.errors
-        }));
+        setIsVerificationModalOpen(true);
       }
     } catch (error) {
-      console.error('Request error:', error);
+      console.error('Request error:', error.response ? error.response.data : error);
       setErrors((prevErrors) => ({
         ...prevErrors,
         network: 'Ошибка сети. Попробуйте снова.'
       }));
     }
   };
+  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
