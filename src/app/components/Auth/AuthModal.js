@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { RxCross1 } from 'react-icons/rx';
 import { useUser } from '../Auth/UserProvider';
 import { useRouter } from 'next/navigation';
-
+import cookies from 'js-cookie'
 
 
 const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
@@ -143,7 +143,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
         remember
       }, {
         headers: {
-          'X-CSRF-TOKEN': Cookie.get('XSRF-TOKEN') // Используем токен
+          'X-CSRF-TOKEN': cookies.get('XSRF-TOKEN') // Используем токен
         },
         withCredentials: true // Обязательно
       });
