@@ -137,9 +137,9 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
         // Получаем CSRF-токен
         const csrfResponse = await fetch(csrfUrl, {
             method: 'GET',
-            credentials: 'include', // Включаем куки
+            credentials: 'include', // Позволяет отправлять куки
             headers: {
-                'Content-Type': 'application/json', // Устанавливаем заголовок Content-Type
+                'Accept': 'application/json',
             },
         });
 
@@ -148,56 +148,36 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
             throw new Error('Failed to get CSRF token');
         }
 
-        // Логируем заголовки и весь ответ
-        const csrfHeaders = csrfResponse.headers;
-        console.log('Response Headers:', [...csrfHeaders]); // Преобразуем в массив для отображения
-        console.log('CSRF Response Status:', csrfResponse.status);
+        // Получаем CSRF токен из ответа
+        const csrfData = await csrfResponse.json();
+        const xsrfToken = csrfData.csrfToken; // Сохраняем токен
 
-        // Проверяем, существуют ли заголовки 'set-cookie'
-        const setCookieHeaders = csrfHeaders.get('set-cookie');
+        // Отправляем запрос на логин с заголовком X-XSRF-TOKEN
+        const response = await fetch(loginUrl, {
+            method: 'POST',
+            credentials: 'include', // Включаем куки
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': xsrfToken || '', // Устанавливаем заголовок
+            },
+            body: JSON.stringify({
+                email,
+                password,
+                remember
+            }),
+        });
 
-        // Убедимся, что заголовок существует
-        if (setCookieHeaders) {
-            console.log('Set-Cookie:', setCookieHeaders);
-            
-            // Извлекаем значение куки XSRF-TOKEN из заголовков ответа
-            const xsrfToken = setCookieHeaders
-                .split(',') // Разделяем на массив по запятой
-                .map(cookie => cookie.trim()) // Убираем пробелы
-                .find(cookie => cookie.startsWith('XSRF-TOKEN=')) // Находим куку XSRF-TOKEN
-                ?.split(';')[0] // Убираем атрибуты
-                .split('=')[1]; // Получаем значение куки
+        const data = await response.json();
 
-            console.log('Extracted XSRF-TOKEN:', xsrfToken);
-            
-            // Отправляем запрос на логин с заголовком X-XSRF-TOKEN
-            const response = await fetch(loginUrl, {
-                method: 'POST',
-                credentials: 'include', // Включаем куки
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-XSRF-TOKEN': xsrfToken || '', // Устанавливаем заголовок
-                },
-                body: JSON.stringify({
-                    email,
-                    password,
-                    remember
-                }),
-            });
-
-            const data = await response.json();
-
-            if (data.verify) {
-                console.log('Success:', data);
-                login({ email: data.email, role: data.role, name: data.name, id: data.id }, data.token);
-                toggleModal();
-                router.push('/dashboard');
-            } else {
-                setIsVerificationModalOpen(true);
-            }
+        if (data.verify) {
+            console.log('Success:', data);
+            login({ email: data.email, role: data.role, name: data.name, id: data.id }, data.token);
+            toggleModal();
+            router.push('/dashboard');
         } else {
-            console.log('Set-Cookie header not found.');
+            setIsVerificationModalOpen(true);
         }
+
     } catch (error) {
         console.error('Request error:', error.message);
         setErrors((prevErrors) => ({
