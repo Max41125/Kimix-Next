@@ -4,9 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { RxCross1 } from 'react-icons/rx';
 import { useUser } from '../Auth/UserProvider';
 import { useRouter } from 'next/navigation';
-
+import Cookies from 'js-cookie';
 import axios from 'axios';
-import { useCookies } from 'next-client-cookies';
+
 
 const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
 
@@ -20,7 +20,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [errors, setErrors] = useState({}); // Состояние для хранения ошибок
   const router = useRouter();
-  const cookies = useCookies();
+
 
 
 
@@ -138,13 +138,14 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
       await axios.get(csrfUrl, { withCredentials: true });
   
       // После получения токена выполняем вход
+      const xsrfToken = Cookies.get('XSRF-TOKEN');
       const response = await axios.post(loginUrl, {
         email,
         password,
         remember
       }, {
         headers: {
-          'X-CSRF-TOKEN': cookies.get('XSRF-TOKEN') // Используем токен
+          'X-CSRF-TOKEN': xsrfToken // Используем токен из куки
         },
         withCredentials: true // Обязательно
       });
@@ -155,7 +156,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
         console.log('Success:', data);
         login({ email: data.email, role: data.role, name: data.name, id: data.id }, data.token);
         toggleModal();
-        router.push('/dashboard'); // Редирект на страницу dashboard
+        router.push('/dashboard');
       } else {
         setIsVerificationModalOpen(true);
       }
@@ -167,6 +168,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
       }));
     }
   };
+  
   
 
   const handleSubmit = async (event) => {
