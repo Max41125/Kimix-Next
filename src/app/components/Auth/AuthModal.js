@@ -143,7 +143,8 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
         password,
         remember
       }, {
-        withCredentials: true // Ключевая часть - включает отправку куки
+        withCredentials: true,
+        withXSRFToken: true
       });
   
       const data = response.data;
