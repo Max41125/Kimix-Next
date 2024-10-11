@@ -142,12 +142,10 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
         email,
         password,
         remember
-      }, {
-        withCredentials: true,
-        withXSRFToken: true
-      });
+      }, { withCredentials: true }); // Убедитесь, что включили withCredentials
   
       const data = response.data;
+  
       if (data.verify) {
         console.log('Success:', data);
         login({ email: data.email, role: data.role, name: data.name, id: data.id }, data.token);
@@ -164,6 +162,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
       }));
     }
   };
+  
   
   
   
