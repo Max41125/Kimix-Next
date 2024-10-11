@@ -115,7 +115,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'X-CSRF-TOKEN': xsrfToken || ''
+          'X-XSRF-TOKEN': xsrfToken || ''
         },
         body: JSON.stringify({
           email,
