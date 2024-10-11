@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { RxCross1 } from 'react-icons/rx';
 import { useUser } from '../Auth/UserProvider';
 import { useRouter } from 'next/navigation';
-import cookies from 'js-cookie'
 
+import axios from 'axios';
+import { useCookies } from 'next-client-cookies';
 
 const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
 
@@ -19,7 +20,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [errors, setErrors] = useState({}); // Состояние для хранения ошибок
   const router = useRouter();
-  
+  const cookies = useCookies();
 
 
 
