@@ -137,12 +137,24 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
       // Получаем CSRF-токен
       await axios.get(csrfUrl, { withCredentials: true });
   
-      // Не нужно вручную читать куку XSRF-TOKEN, она автоматически прикрепляется к запросам
+      // Получаем значение токена из куки
+      const xsrfToken = document.cookie.split('; ')
+        .find(row => row.startsWith('XSRF-TOKEN='))
+        ?.split('=')[1];
+  
+      // Устанавливаем заголовок X-XSRF-TOKEN
+      const config = {
+        withCredentials: true,
+        headers: {
+          'X-XSRF-TOKEN': xsrfToken || '',
+        },
+      };
+  
       const response = await axios.post(loginUrl, {
         email,
         password,
         remember
-      }, { withCredentials: true }); // Убедитесь, что включили withCredentials
+      }, config);
   
       const data = response.data;
   
@@ -162,7 +174,6 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
       }));
     }
   };
-  
   
   
   
