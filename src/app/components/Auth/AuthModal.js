@@ -89,14 +89,33 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
 
   const registerUser = async () => {
     const url = 'https://test.kimix.space/api/auth/register';
-  
+    const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
     try {
+
+      const csrfResponse = await fetch(csrfUrl, {
+        method: 'GET',
+        credentials: 'include', // Позволяет отправлять куки
+        headers: {
+            'Accept': 'application/json',
+        },
+    });
+
+    // Проверяем, успешен ли запрос
+    if (!csrfResponse.ok) {
+        throw new Error('Failed to get CSRF token');
+    }
+
+    // Получаем CSRF токен из ответа
+    const csrfData = await csrfResponse.json();
+    const xsrfToken = csrfData.csrfToken; // Сохраняем токен
+
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'X-CSRF-TOKEN': csrfToken || ''
+          'X-CSRF-TOKEN': xsrfToken || ''
         },
         body: JSON.stringify({
           email,
