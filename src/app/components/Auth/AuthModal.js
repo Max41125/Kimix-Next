@@ -89,33 +89,14 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
 
   const registerUser = async () => {
     const url = 'https://test.kimix.space/api/auth/register';
-    const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+  
     try {
-
-      const csrfResponse = await fetch(csrfUrl, {
-        method: 'GET',
-        credentials: 'include', // Позволяет отправлять куки
-        headers: {
-            'Accept': 'application/json',
-        },
-    });
-
-    // Проверяем, успешен ли запрос
-    if (!csrfResponse.ok) {
-        throw new Error('Failed to get CSRF token');
-    }
-
-    // Получаем CSRF токен из ответа
-    const csrfData = await csrfResponse.json();
-    const xsrfToken = csrfData.csrfToken; // Сохраняем токен
-
-
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'X-XSRF-TOKEN': xsrfToken || ''
+          'X-CSRF-TOKEN': csrfToken || ''
         },
         body: JSON.stringify({
           email,
@@ -151,54 +132,41 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
   const loginUser = async () => {
     const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
     const loginUrl = 'https://test.kimix.space/api/auth/login';
+    
 
+    axios.defaults.withXSRFToken = true
+    
     try {
         // Получаем CSRF-токен
-        const csrfResponse = await fetch(csrfUrl, {
-            method: 'GET',
-            credentials: 'include', // Позволяет отправлять куки
-            headers: {
-                'Accept': 'application/json',
-            },
+        await axios.get(csrfUrl, {
+            withCredentials: true,
+            withXSRFToken:true,
         });
 
-        // Проверяем, успешен ли запрос
-        if (!csrfResponse.ok) {
-            throw new Error('Failed to get CSRF token');
-        }
-
-        // Получаем CSRF токен из ответа
-        const csrfData = await csrfResponse.json();
-        const xsrfToken = csrfData.csrfToken; // Сохраняем токен
-
-        // Отправляем запрос на логин с заголовком X-XSRF-TOKEN
-        const response = await fetch(loginUrl, {
-            method: 'POST',
-            credentials: 'include', // Включаем куки
-            headers: {
-                'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': xsrfToken || '', // Устанавливаем заголовок
-            },
-            body: JSON.stringify({
+            // Отправляем запрос на логин с заголовком X-XSRF-TOKEN
+            const response = await axios.post(loginUrl, {
                 email,
                 password,
                 remember
-            }),
-        });
+            }, {
+               
+                withCredentials: true,
+                withXSRFToken:true,
+            });
 
-        const data = await response.json();
+            const data = response.data;
 
-        if (data.verify) {
-            console.log('Success:', data);
-            login({ email: data.email, role: data.role, name: data.name, id: data.id }, data.token);
-            toggleModal();
-            router.push('/dashboard');
-        } else {
-            setIsVerificationModalOpen(true);
-        }
-
+            if (data.verify) {
+                console.log('Success:', data);
+                login({ email: data.email, role: data.role, name: data.name, id: data.id }, data.token);
+                toggleModal();
+                router.push('/dashboard');
+            } else {
+                setIsVerificationModalOpen(true);
+            }
+       
     } catch (error) {
-        console.error('Request error:', error.message);
+        console.error('Request error:', error.response ? error.response.data : error);
         setErrors((prevErrors) => ({
             ...prevErrors,
             network: 'Ошибка сети. Попробуйте снова.'
