@@ -20,4 +20,4 @@ RUN npm run build
 EXPOSE 3000
 
 # Запускаем сервер
-CMD ["npm", "start"]
+CMD ["serve", "-s", "out", "-l", "3000"]
