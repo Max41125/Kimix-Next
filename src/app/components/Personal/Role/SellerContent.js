@@ -10,7 +10,7 @@ const SellerContent = ({ userId, userToken }) => {
   const [chemicals, setChemicals] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [userProducts, setUserProducts] = useState([]);
-
+  const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
   // Получение всех товаров пользователя при загрузке компонента
   useEffect(() => {
     const fetchUserProducts = async () => {
@@ -54,13 +54,21 @@ const SellerContent = ({ userId, userToken }) => {
 
   const handleSubmit = async () => {
     try {
+
+
       const productIds = selectedProducts.map(product => product.id);
+      await axios.get(csrfUrl, {
+        withCredentials: true,
+
+    });
       await axios.put(`https://test.kimix.space/api/users/${userId}/products`, 
         { products: productIds },
         {
           headers: {
             Authorization: `Bearer ${userToken}` 
-          }
+          },
+          withCredentials: true,
+          withXSRFToken:true,
         }
       );
       alert('Товары успешно обновлены!');
@@ -72,11 +80,17 @@ const SellerContent = ({ userId, userToken }) => {
 
   const handleRemoveProduct = async (productId) => {
     try {
+      await axios.get(csrfUrl, {
+        withCredentials: true,
+
+    });
       await axios.delete(`https://test.kimix.space/api/users/${userId}/products`, {
         data: { products: [productId] },
         headers: {
           Authorization: `Bearer ${userToken}`
-        }
+        },
+        withCredentials: true,
+        withXSRFToken:true,
       });
       setUserProducts(prevProducts => prevProducts.filter(product => product.id !== productId));
     } catch (error) {
