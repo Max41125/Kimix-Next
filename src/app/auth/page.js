@@ -6,7 +6,7 @@ import { UserProvider } from '@/app/components/Auth/UserProvider';
 import { CiCircleCheck } from "react-icons/ci"; 
 import { CiCircleRemove } from "react-icons/ci";
 import { useRouter } from 'next/navigation';
-import Link from "next/link";
+import axios from 'axios';
 
 const AuthPage = () => {
   const router = useRouter(); // Инициализация useRouter
@@ -21,39 +21,11 @@ const AuthPage = () => {
   const [isRegistered, setIsRegistered] = useState(false); // Успешная регистрация
   const [errors, setErrors] = useState(null); // Ошибки сервера
   const [verificationMessage, setVerificationMessage] = useState(null); // Сообщение о подтверждении
-
+  const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
   const handleRoleChange = (selectedRole) => {
     setRole(selectedRole);
   };
 
-
-  const fetchCsrfToken = async () => {
-    try {
-      const response = await fetch('/api/csrf-token', { // Измените URL на путь к вашему API
-        method: 'GET',
-        credentials: 'include',
-      });
-  
-      if (response.ok) {
-        const data = await response.json(); // Получаем JSON из ответа
-        const token = data.cookies.find(cookie => cookie.startsWith('XSRF-TOKEN='));
-        if (token) {
-          const tokenValue = token.split(';')[0].split('=')[1]; // Извлекаем только значение токена
-          setCsrfToken(decodeURIComponent(tokenValue));
-        }
-      } else {
-        console.error('Failed to fetch CSRF token:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error fetching CSRF token:', error);
-    }
-  };
-
-  useEffect(() => {
-
-      fetchCsrfToken();
-
-    }, []);
 
 
 
@@ -76,20 +48,21 @@ const AuthPage = () => {
     const url = 'https://test.kimix.space/api/auth/register';
     
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-CSRF-TOKEN': csrfToken || ''
-        },
-        body: JSON.stringify({
+          await axios.get(csrfUrl, {
+            withCredentials: true,
+
+        });
+
+        const response = await axios.post(url, {
           email,
           name,
           password,
           password_confirmation: confirmPassword,
           role
-        })
+      }, {
+        
+          withCredentials: true,
+          withXSRFToken:true,
       });
   
       const data = await response.json();
@@ -116,19 +89,22 @@ const AuthPage = () => {
   const loginUser = async () => {
     const url = 'https://test.kimix.space/api/auth/login';
     try {
-      const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'X-CSRF-TOKEN': csrfToken || ''
-          },
-          body: JSON.stringify({
-              email,
-              password,
-              remember // Добавлено
-          })
-      });
+      await axios.get(csrfUrl, {
+        withCredentials: true,
+
+    });
+
+        // Отправляем запрос на логин с заголовком X-XSRF-TOKEN
+        const response = await axios.post(url, {
+            email,
+            password,
+            remember
+        }, {
+           
+            withCredentials: true,
+            withXSRFToken:true,
+        });
+
 
       const data = await response.json();
       if (response.ok) {

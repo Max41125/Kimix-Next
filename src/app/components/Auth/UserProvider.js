@@ -1,12 +1,12 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-
+import { useRouter } from 'next/navigation';
 const UserContext = createContext();
 
 export const UserProvider = ({ children, csrfToken }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState('');
-
+    const router = useRouter();
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -44,6 +44,7 @@ export const UserProvider = ({ children, csrfToken }) => {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 console.log('Logout successful');
+                router.push('/');
             } else {
                 const data = await response.json();
                 console.error('Logout error:', data);

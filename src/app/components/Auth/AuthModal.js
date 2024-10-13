@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { RxCross1 } from 'react-icons/rx';
 import { useUser } from '../Auth/UserProvider';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
 import axios from 'axios';
 
 
@@ -20,7 +19,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [errors, setErrors] = useState({}); // Состояние для хранения ошибок
   const router = useRouter();
-
+  const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
 
 
 
@@ -91,21 +90,23 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
     const url = 'https://test.kimix.space/api/auth/register';
   
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-CSRF-TOKEN': csrfToken || ''
-        },
-        body: JSON.stringify({
-          email,
-          name,
-          password,
-          password_confirmation: confirmPassword,
-          role
-        })
+        await axios.get(csrfUrl, {
+          withCredentials: true,
+
       });
+
+      const response = await axios.post(url, {
+        email,
+        name,
+        password,
+        password_confirmation: confirmPassword,
+        role
+    }, {
+       
+        withCredentials: true,
+        withXSRFToken:true,
+    });
+
   
       const data = await response.json();
       if (response.ok) {
@@ -130,17 +131,16 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
   };
 
   const loginUser = async () => {
-    const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
     const loginUrl = 'https://test.kimix.space/api/auth/login';
     
 
-    axios.defaults.withXSRFToken = true
+  
     
     try {
         // Получаем CSRF-токен
         await axios.get(csrfUrl, {
             withCredentials: true,
-            withXSRFToken:true,
+
         });
 
             // Отправляем запрос на логин с заголовком X-XSRF-TOKEN
