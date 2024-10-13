@@ -46,6 +46,7 @@ export const UserProvider = ({ children, csrfToken }) => {
               'Authorization': `Bearer ${token}`
             },
             withCredentials: true,
+            withXSRFToken:true,
           });
       
           // Проверка успешности запроса
