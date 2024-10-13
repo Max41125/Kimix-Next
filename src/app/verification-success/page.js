@@ -11,7 +11,7 @@ const VerificationSuccess = () => {
       <UserProvider>
         <Header />
       </UserProvider>
-      <Suspense fallback={<Loader />}>
+
         <div className="bg-gradient-to-r from-emerald-400 from-30% via-violet-400 via-100% to-blue-500">
           <div className="mx-auto container px-4 py-12 min-h-screen flex flex-col items-center justify-center ">
         
@@ -28,7 +28,7 @@ const VerificationSuccess = () => {
             </div>
           </div>
         </div>
-      </Suspense>
+
     </>
   );
 };

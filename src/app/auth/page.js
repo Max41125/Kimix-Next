@@ -14,8 +14,6 @@ const AuthPage = () => {
     <>
       <UserProvider>
           <Header />
-      
-      
           <LoginForm />
       </UserProvider>
     </>
