@@ -108,8 +108,8 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
     });
 
   
-      const data = await response.json();
-      if (response.ok) {
+      const data = response.data;
+      if (response.status >= 200 && response.status < 300) {
         console.log('Success:', data);
         setIsVerificationModalOpen(true); // Открываем модальное окно подтверждения почты
         setErrors({}); // Сброс ошибок после успешной регистрации
