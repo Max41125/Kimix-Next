@@ -64,8 +64,8 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
 
     if (!password) {
       newErrors.password = 'Пароль обязателен';
-    } else if (password.length < 6) {
-      newErrors.password = 'Пароль должен содержать минимум 6 символов';
+    } else if (password.length < 8) {
+      newErrors.password = 'Пароль должен содержать минимум 8 символов';
     }
 
     if (!isLoginMode) {

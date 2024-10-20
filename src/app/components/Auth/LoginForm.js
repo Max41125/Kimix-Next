@@ -19,7 +19,7 @@ const LoginForm = () => {
   const { login } = useUser();
   const [remember, setRemember] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false); // Успешная регистрация
-  const [errors, setErrors] = useState(null); // Ошибки сервера
+  const [errors, setErrors] = useState({}); // Состояние для хранения ошибок
   const [verificationMessage, setVerificationMessage] = useState(null); // Сообщение о подтверждении
   const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
   const handleRoleChange = (selectedRole) => {
@@ -29,108 +29,170 @@ const LoginForm = () => {
 
 
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
 
-    if (isLoginMode) {
-      await loginUser(); // Логика логина
-    } else {
-      // Проверка совпадения паролей
-      if (password !== confirmPassword) {
-        setErrors({ message: "Пароли не совпадают." });
-        return;
-      }
-      await registerUser(); // Логика регистрации
+
+
+  // Валидация перед отправкой
+  const validate = () => {
+    const newErrors = {};
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Простой паттерн для email
+
+    if (!email) {
+      newErrors.email = 'Email обязателен';
+    } else if (!emailPattern.test(email)) {
+      newErrors.email = 'Некорректный email';
     }
+
+    if (!password) {
+      newErrors.password = 'Пароль обязателен';
+    } else if (password.length < 8) {
+      newErrors.password = 'Пароль должен содержать минимум 8 символов';
+    }
+
+    if (!isLoginMode) {
+      if (!name) {
+        newErrors.name = 'Имя обязательно';
+      }
+
+      if (confirmPassword !== password) {
+        newErrors.confirmPassword = 'Пароли не совпадают';
+      }
+
+      if (!role) {
+        newErrors.role = 'Выберите роль';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0; // Возвращает true, если ошибок нет
   };
+
+
+
+
 
   const registerUser = async () => {
     const url = 'https://test.kimix.space/api/auth/register';
-    
+  
     try {
-          await axios.get(csrfUrl, {
-            withCredentials: true,
-
-        });
-
-        const response = await axios.post(url, {
-          email,
-          name,
-          password,
-          password_confirmation: confirmPassword,
-          role
-      }, {
-        
+        await axios.get(csrfUrl, {
           withCredentials: true,
-          withXSRFToken:true,
+
       });
+
+      const response = await axios.post(url, {
+        email,
+        name,
+        password,
+        password_confirmation: confirmPassword,
+        role
+    }, {
+       
+        withCredentials: true,
+        withXSRFToken:true,
+    });
+
   
       const data = response.data;
-      if (response.status >= 200 && response.status < 300) { // Проверяем код ответа
+      if (response.status >= 200 && response.status < 300) {
         console.log('Success:', data);
-        setIsRegistered(true); // Устанавливаем состояние успешной регистрации
-        setErrors(null); // Сброс ошибок
+        setIsRegistered(true);
+        setErrors({}); // Сброс ошибок после успешной регистрации
       } else {
         console.error('Error:', data);
-        // Обработка ошибок, если они существуют
-        if (data.errors) {
-          const errorMessages = Object.values(data.errors).flat(); // Извлечение ошибок из объекта
-          setErrors({ message: errorMessages });
-        } else {
-          setErrors({ message: data.message }); // Устанавливаем общее сообщение об ошибке
-        }
+        const errorMessages = data.errors || {};
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          ...errorMessages
+        }));
       }
     } catch (error) {
       console.error('Request error:', error);
-      setErrors({ message: "Произошла ошибка при отправке запроса." });
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        network: 'Ошибка сети. Попробуйте снова.'
+      }));
     }
   };
+
+
 
   const loginUser = async () => {
-    const url = 'https://test.kimix.space/api/auth/login';
+    const loginUrl = 'https://test.kimix.space/api/auth/login';
+    
     try {
-      await axios.get(csrfUrl, {
-        withCredentials: true,
-
-    });
-
-        // Отправляем запрос на логин с заголовком X-XSRF-TOKEN
-        const response = await axios.post(url, {
-            email,
-            password,
-            remember
-        }, {
-           
+        // Получаем CSRF-токен
+        await axios.get(csrfUrl, {
             withCredentials: true,
-            withXSRFToken:true,
+
         });
 
+            // Отправляем запрос на логин с заголовком X-XSRF-TOKEN
+            const response = await axios.post(loginUrl, {
+                email,
+                password,
+                remember
+            }, {
+               
+                withCredentials: true,
+                withXSRFToken:true,
+            });
 
-      const data = response.data;
+            const data = response.data;
 
-        if (!data.verify) {
-          setVerificationMessage("Пожалуйста, подтвердите вашу почту."); // Устанавливаем сообщение о подтверждении
-          setErrors(null); // Сброс ошибок
-        } else {
-          console.log('Success:', data);
-
-          login({ email: data.email, role: data.role, name: data.name, id:data.id }, data.token);
-          // И выполнить редирект
-          router.push('/dashboard'); // Перенаправляем на дашборд
-        }
+            if (data.verify) {
+              console.log('Success:', data);
+              login({ email: data.email, role: data.role, name: data.name, id:data.id }, data.token);
+              router.push('/dashboard'); // Перенаправляем на дашборд
+            } else {
+              setVerificationMessage("Пожалуйста, подтвердите вашу почту.");
+              setErrors(null); // Сброс ошибок
+            }
        
     } catch (error) {
-      console.error('Request error:', error);
-      setErrors({ message: "Произошла ошибка при отправке запроса." });
+        console.error('Request error:', error.response ? error.response.data : error);
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            network: 'Ошибка сети. Попробуйте снова.'
+        }));
     }
-  };
+};
+
+
+const handleSubmit = async (event) => {
+  event.preventDefault();
+  if (!validate()) return;
+
+  if (isLoginMode) {
+    await loginUser(); // Логика логина
+  } else {
+
+    await registerUser(); // Логика регистрации
+  }
+
+    // Сброс значений после успешной отправки (необходимо оставить только для успешного логина)
+    if (isLoginMode) {
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      setName('');
+      setRole('');
+      setErrors({}); // Сброс ошибок
+    }
+
+};
+
+
+
+
+
 
   return (
     <>
 
       
         <div className="flex justify-center h-screen container mx-auto p-4 items-center">
-            <div className="bg-white shadow-2xl p-10 rounded-lg">
+            <div className="bg-white shadow-2xl p-10 rounded-lg w-full lg:w-6/12">
 
                 <div className="flex justify-center mb-4">
                     <button
@@ -147,43 +209,55 @@ const LoginForm = () => {
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+                <form onSubmit={handleSubmit} className=" mx-auto  w-full">
                     {!isLoginMode && (
-                      <input
-                          type="text"
-                          placeholder="Имя"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          className="border rounded w-full p-2 mb-4"
-                          required={!isLoginMode}
-                      />
+                      <div className='mb-4'>
+                        <input
+                            type="text"
+                            placeholder="Имя"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="border rounded w-full p-2 "
+                            required={!isLoginMode}
+                        />
+                       {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+                      </div>
                     )}
-                    <input
-                      type="email"
-                      placeholder="Email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="border rounded w-full p-2 mb-4"
-                      required
-                    />
+                    <div className='mb-4'>
+                      <input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="border rounded w-full p-2 "
+                        required
+                      />
+                      {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                      </div>
+                    <div className='mb-4'>
                     <input
                       type="password"
                       placeholder="Пароль"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="border rounded w-full p-2 mb-4"
+                      className="border rounded w-full p-2 "
                       required
                     />
+                    {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+                    </div>
                     {!isLoginMode && (
                       <>
+                      <div className='mb-4'>
                         <input
                           type="password"
                           placeholder="Подтверждение пароля"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="border rounded w-full p-2 mb-4"
+                          className="border rounded w-full p-2 "
                           required={!isLoginMode}
                         />
+                         {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
+                        </div>
                         <div className="mb-4 flex space-x-2">
                             <label
                                 className={`flex-1 p-2 text-center border rounded ${role === 'buyer' ? 'bg-green-500 text-white' : ''}`}
@@ -204,6 +278,8 @@ const LoginForm = () => {
                                 Продавец
                             </label>
                         </div>
+                        {errors.role && <p className="text-red-500 text-sm">{errors.role}</p>}
+                        {errors.network && <p className="text-red-500 text-sm">{errors.network}</p>}
                       </>
                     )}
 
@@ -243,13 +319,7 @@ const LoginForm = () => {
                   </div>
                 )}
 
-                {/* Отображение ошибок */}
-                {errors && (
-                  <div className="mt-4 flex items-center text-red-600">
-                    <CiCircleRemove className="w-6 h-6 mr-2" />
-                    <span>{errors.message || "Ошибка!"}</span>
-                  </div>
-                )}
+
 
             </div>
         </div>
