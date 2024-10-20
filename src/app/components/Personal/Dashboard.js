@@ -5,7 +5,7 @@ import { useUser } from '../Auth/UserProvider';
 import BuyerContent from '@/app/components/Personal/Role/BuyerContent'; // Импортируйте контент для Buyer
 import StudentContent from '@/app/components/Personal/Role/StudentContent'; // Импортируйте контент для Student
 import SellerContent from '@/app/components/Personal/Role/SellerContent'; // Импортируйте контент для Seller
-import Loader from '../Loader';
+import Loader from '../Loaders/Loader';
 
 const Dashboard = () => {
 

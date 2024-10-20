@@ -43,7 +43,7 @@ const Header = () => {
           <form className="w-full px-10 relative" onSubmit={(e) => e.preventDefault()}>
             <input
               type="text"
-              placeholder="Введите название вещества/артикул/CAS номер"
+              placeholder="Введите название вещества/формулу/CAS номер"
               value={searchQuery}
               onChange={handleSearchChange}
               className="border w-full rounded-full py-2 pl-10 pr-10 flex-grow"

@@ -2,15 +2,18 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ReactSVG } from 'react-svg';
 import Image from "next/image";
-import Logo from '/public/logo.svg';
-
+import NotFound from '/public/notfound.svg';
 
 const SellerContent = ({ userId, userToken }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [chemicals, setChemicals] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [userProducts, setUserProducts] = useState([]);
+  const [selectedUnits, setSelectedUnits] = useState({});
+  const [productPrices, setProductPrices] = useState({}); // Состояние для хранения цен на товары
+  const [currencyUnits, setCurrencyUnits] = useState({});
   const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+
   // Получение всех товаров пользователя при загрузке компонента
   useEffect(() => {
     const fetchUserProducts = async () => {
@@ -49,36 +52,30 @@ const SellerContent = ({ userId, userToken }) => {
   const handleSelectProduct = (id, title) => {
     if (!selectedProducts.some(product => product.id === id)) {
       setSelectedProducts((prev) => [...prev, { id, title }]);
+      setSelectedUnits((prev) => ({ ...prev, [id]: 'grams' })); // Устанавливаем по умолчанию граммы
+      setProductPrices((prev) => ({ ...prev, [id]: '' })); // Инициализируем цену для нового товара
+      setCurrencyUnits((prev) => ({ ...prev, [id]: 'RUB' }));
     }
   };
 
-  const handleSubmit = async () => {
-    try {
+  const handleRemoveProduct = (id) => {
+    setSelectedProducts(selectedProducts.filter(product => product.id !== id));
+    const newSelectedUnits = { ...selectedUnits };
+    delete newSelectedUnits[id]; // Удаляем выбранную единицу
+    setSelectedUnits(newSelectedUnits);
+
+    const newProductPrices = { ...productPrices };
+    delete newProductPrices[id]; // Удаляем цену
+    setProductPrices(newProductPrices);
+
+    const newCurrencyUnits = { ...currencyUnits };
+    delete newCurrencyUnits[id]; // Удаляем выбранную единицу
+    setCurrencyUnits(newCurrencyUnits);
 
 
-      const productIds = selectedProducts.map(product => product.id);
-      await axios.get(csrfUrl, {
-        withCredentials: true,
-
-    });
-      await axios.put(`https://test.kimix.space/api/users/${userId}/products`, 
-        { products: productIds },
-        {
-          headers: {
-            Authorization: `Bearer ${userToken}` 
-          },
-          withCredentials: true,
-          withXSRFToken:true,
-        }
-      );
-      alert('Товары успешно обновлены!');
-      setSelectedProducts([]);
-    } catch (error) {
-      console.error("Ошибка при обновлении товаров:", error);
-    }
   };
 
-  const handleRemoveProduct = async (productId) => {
+  const handleRemoveProductStore = async (productId) => {
     try {
       await axios.get(csrfUrl, {
         withCredentials: true,
@@ -98,6 +95,38 @@ const SellerContent = ({ userId, userToken }) => {
     }
   };
 
+
+  const handleSubmit = async () => {
+    try {
+      const productIds = selectedProducts.map(product => ({
+        id: product.id,
+        unit_type: selectedUnits[product.id], // Получаем тип единицы
+        currency: currencyUnits[product.id], // Добавляем валюту, можно изменить если хотите добавить выбор валюты для каждого товара
+        price: productPrices[product.id], // Добавляем цену
+      }));
+      await axios.get(csrfUrl, {
+        withCredentials: true,
+      });
+      await axios.put(`https://test.kimix.space/api/users/${userId}/products`, 
+        { products: productIds },
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}` 
+          },
+          withCredentials: true,
+          withXSRFToken: true,
+        }
+      );
+      alert('Товары успешно обновлены!');
+      setSelectedProducts([]);
+      setSelectedUnits({});
+      setProductPrices({});
+      setCurrencyUnits({});
+    } catch (error) {
+      console.error("Ошибка при обновлении товаров:", error);
+    }
+  };
+
   return (
     <>
       <div className="p-4">
@@ -110,7 +139,7 @@ const SellerContent = ({ userId, userToken }) => {
           className="border border-gray-300 p-2 rounded w-full"
         />
         {chemicals.length > 0 && (
-          <ul className="mt-2 border border-gray-300 rounded max-h-40 overflow-y-auto">
+          <ul className="mt-2 border border-gray-300 rounded max-h-96 overflow-y-auto">
             {chemicals.map((chemical) => (
               <li
                 key={chemical.id}
@@ -129,7 +158,45 @@ const SellerContent = ({ userId, userToken }) => {
             <h3 className="font-semibold">Выбранные товары:</h3>
             <ul>
               {selectedProducts.map((product) => (
-                <li key={product.id}>{product.title}</li>
+                <li key={product.id} className="flex border-gray-100 p-4 items-center justify-between">
+                  <span>{product.title}</span>
+                  <div className="flex items-center">
+                    <select
+                      value={selectedUnits[product.id]}
+                      onChange={(e) => setSelectedUnits({ ...selectedUnits, [product.id]: e.target.value })}
+                      className="ml-2 border border-gray-300 p-1 rounded"
+                    >
+                      <option value="grams">Граммы</option>
+                      <option value="kilograms">Килограммы</option>
+                      <option value="tons">Тонны</option>
+                      <option value="pieces">Штуки</option>
+                    </select>
+                    <input
+                      type="number"
+                      placeholder="Цена/ед."
+                      value={productPrices[product.id] || ''}
+                      onChange={(e) => setProductPrices({ ...productPrices, [product.id]: e.target.value })}
+                      className="ml-2 border border-gray-300 p-1 rounded w-24"
+                    />
+                    <label htmlFor={`currency-${product.id}`} className="ml-2">Валюта:</label>
+                    <select
+                      id={`currency-${product.id}`}
+                      onChange={(e) => setCurrencyUnits({ ...currencyUnits, [product.id]: e.target.value })}
+                      className="ml-2 border border-gray-300 p-1 rounded"
+                    >
+                      <option value="RUB">RUB</option>
+                      <option value="USD">USD</option>
+                      <option value="EUR">EUR</option>
+                      <option value="CNY">CNY</option>
+                    </select>
+                    <button
+                      onClick={() => handleRemoveProduct(product.id)}
+                      className="ml-2 text-red-500"
+                    >
+                      ✖️
+                    </button>
+                  </div>
+                </li>
               ))}
             </ul>
           </div>
@@ -152,27 +219,26 @@ const SellerContent = ({ userId, userToken }) => {
                 <div>
                   <p>Название: {product.title}</p>
                   <div className="flex justify-center items-center w-full h-40 mb-4 border rounded">
-                  {product.image ? (
-                    <ReactSVG 
-                      src={`data:image/svg+xml;utf8,${encodeURIComponent(product.image)}`} 
-                      className=" object-contain" // Задаем ширину и высоту
-                    />
-                  ) : (
-                    <Image
-                      src={Logo} // Иконка по умолчанию
-                      alt="No image"
-                       // Используйте fill, чтобы занять всю доступную область
-                      className="object-contain" // Чтобы иконка сохраняла пропорции
-                    />
-                  )}
-                </div>
-
+                    {product.image ? (
+                      <ReactSVG 
+                        src={`data:image/svg+xml;utf8,${encodeURIComponent(product.image)}`} 
+                        className="flex items-center" // Задаем ширину и высоту
+                      />
+                    ) : (
+                      <Image
+                        src={NotFound} // Иконка по умолчанию
+                        alt="No image"
+                        height={150}
+                        className="flex flex-col" // Чтобы иконка сохраняла пропорции
+                      />
+                    )}
+                  </div>
 
                   <p>CAS Number: {product.cas_number}</p>
                   <p>Формула: {product.formula}</p>
                 </div>
                 <button
-                  onClick={() => handleRemoveProduct(product.id)}
+                  onClick={() => handleRemoveProductStore(product.id)}
                   className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                 >
                   Удалить

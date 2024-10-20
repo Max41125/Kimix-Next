@@ -27,8 +27,14 @@ export default function Home() {
         <Image src={ConstructorIcon} width={300} height={200} /> {/* Adjust size as needed */}
         <span className="text-lg font-semibold my-8">Конструктор реагентов</span>
       </Link>
-    </div>
+      </div>
+      <div className="flex justify-center container mx-auto space-x-4 mt-10">
+      <Link href="/chemicals" className="flex flex-col items-center w-full rounded-lg shadow-lg hover:bg-gray-100 transition duration-200">
+        <Image src={ConstructorIcon} width={300} height={200} /> {/* Adjust size as needed */}
+        <span className="text-lg font-semibold my-8">Поиск товаров</span>
+      </Link>
 
-    </main>
+      </div>
+  </main>
   );
 }

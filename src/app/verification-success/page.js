@@ -2,7 +2,7 @@
 
 import React, { Suspense } from 'react';
 import Header from '@/app/components/Module/Header';
-import Loader from '@/app/components/Loader';
+import Loader from '@/app/components/Loaders/Loader';
 import { UserProvider } from '@/app/components/Auth/UserProvider';
 import Link from "next/link";
 const VerificationSuccess = () => {
