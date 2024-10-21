@@ -1,23 +1,22 @@
-"use client"; 
+'use client';
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense } from 'react';
 import Header from '@/app/components/Module/Header';
 import Loader from '@/app/components/Loaders/Loader';
 import { UserProvider } from '@/app/components/Auth/UserProvider';
+import { CartProvider } from '@/app/components/Cart/CartProvider';
 import ChemicalProduct from '@/app/components/Chemicals/ChemicalProduct';
 
-
 const ChemicalDetail = () => {
-
-
   return (
-    <>
+    
       <UserProvider>
         <Header />
-        <ChemicalProduct />
+        <CartProvider>
+          <ChemicalProduct />
+        </CartProvider>
       </UserProvider>
 
-    </>
   );
 };
 

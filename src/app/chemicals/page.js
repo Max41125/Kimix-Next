@@ -6,7 +6,7 @@ import Header from '@/app/components/Module/Header';
 import { UserProvider } from '@/app/components/Auth/UserProvider';
 import SearchSVG from '/public/search.svg';
 import Image from "next/image";
-import TypingText from '@/app/components/TypingText'; 
+import TypingText from '@/app/components/Decor/TypingText'; 
 import ChemicalList from '@/app/components/Chemicals/ChemicalList';
 import Circle from '@/app/components/Loaders/Circle';
 
@@ -17,8 +17,7 @@ const ChemicalsPage = () => {
     const [error, setError] = useState(null);
     const router = useRouter(); 
     const [debounceTimeout, setDebounceTimeout] = useState(null);
-  // Fetch chemicals based on search query
-  // Fetch chemicals based on search query
+
   useEffect(() => {
     // Clear the previous timeout if it exists
     if (debounceTimeout) {

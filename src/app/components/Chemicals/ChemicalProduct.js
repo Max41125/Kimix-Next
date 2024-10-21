@@ -3,11 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Loader from '@/app/components/Loaders/Loader';
 import { useUser } from '@/app/components/Auth/UserProvider';
+import { ReactSVG } from 'react-svg';
+import { useSearchParams } from 'next/navigation';
+import { useCart } from '../Cart/CartProvider';
 import BlurredContent from '@/app/components/Auth/BlurredContent';
 import Image from 'next/image';
-import { ReactSVG } from 'react-svg';
 import NotFound from '/public/notfound.svg';
-import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 
 
@@ -19,7 +20,6 @@ const ChemicalProduct = () => {
     const [suppliers, setSuppliers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [cart, setCart] = useState([]); // Состояние для корзины
     const [quantities, setQuantities] = useState({}); // Состояние для количеств
   
     const { user } = useUser() || {};
@@ -45,16 +45,19 @@ const ChemicalProduct = () => {
       fetchChemical();
     }, [id]);
   
-    const addToCart = (supplier, quantity) => {
+    const { addToCart } = useCart();
+
+    const handleAddToCart = (supplier, quantity) => {
       const newItem = {
+        title: chemical.title,
         name: supplier.name,
         price: supplier.price,
         currency: supplier.currency,
         unit_type: supplier.unit_type,
-        quantity: quantity || 1, 
+        quantity: quantity || 1,
       };
-      
-      setCart((prevCart) => [...prevCart, newItem]);
+  
+      addToCart(newItem); // Use the context's addToCart function
     };
   
     const handleQuantityChange = (supplierId, value) => {
@@ -143,7 +146,7 @@ const ChemicalProduct = () => {
                                 className="w-16 p-2 border rounded"
                               />
                               <button
-                                onClick={() => addToCart(supplier, quantities[supplier.id])}
+                                onClick={() => handleAddToCart(supplier, quantities[supplier.id])}
                                 className="inline-block px-6 py-3 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors duration-300"
                               >
                                 Добавить в корзину
