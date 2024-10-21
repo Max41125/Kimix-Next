@@ -5,7 +5,7 @@ const UserContext = createContext();
 import axios from 'axios';
 
 
-export const UserProvider = ({ children, csrfToken }) => {
+export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState('');
     const router = useRouter();

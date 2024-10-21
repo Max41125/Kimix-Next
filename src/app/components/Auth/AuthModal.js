@@ -204,7 +204,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+        <div className="fixed z-10 inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
           <div id="modal" className="bg-white w-max lg:w-6/12 relative p-6 rounded shadow-md">
             <h2 className="text-xl mb-4">{isLoginMode ? "Вход" : "Регистрация"}</h2>
             <form onSubmit={handleSubmit}>
