@@ -49,8 +49,11 @@ const ChemicalProduct = () => {
 
     const handleAddToCart = (supplier, quantity) => {
       const newItem = {
+        id: chemical.id,
         title: chemical.title,
-        name: supplier.name,
+        image:chemical.image,
+        supplier: supplier.name,
+        supplier_id: supplier.id,
         price: supplier.price,
         currency: supplier.currency,
         unit_type: supplier.unit_type,

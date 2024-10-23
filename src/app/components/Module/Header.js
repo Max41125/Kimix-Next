@@ -8,9 +8,11 @@ import { CiSearch, CiLogin } from "react-icons/ci";
 import { FaRegCircleUser } from "react-icons/fa6"; 
 import AuthModal from "../Auth/AuthModal"; // Убедитесь, что путь правильный
 import { useUser } from '../Auth/UserProvider'; 
+import { BsCart2 } from "react-icons/bs";
+
 
 const Header = () => {
-  const { user, logout } = useUser(); 
+  const { user, logout } = useUser() || {}; 
   const [isModalOpen, setModalOpen] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,7 +34,7 @@ const Header = () => {
     logout(); // Вызываем функцию logout из контекста
     setDropdownOpen(false); // Закрываем меню
   };
-
+ 
   return (
     <>
       <header className="w-full py-4 px-4 bg-gray-100">
@@ -57,7 +59,14 @@ const Header = () => {
               </button>
             </Link>
           </form>
+            {user?.role === "buyer" &&(
 
+              <Link href="/cart">
+                <button className="text-teal-500 mr-4">
+                  <BsCart2 size={25} color="#14D8B5" />
+                </button>
+              </Link>
+            )}
           {/* Иконка пользователя */}
           <div className="relative">
             <button onClick={user ? handleDropdownToggle : toggleModal} className="text-teal-500">

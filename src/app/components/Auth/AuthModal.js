@@ -318,7 +318,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
         </div>
       )}
       {isVerificationModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+        <div className="fixed z-20 inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
           <div className="bg-white relative p-6 rounded shadow-md">
             <h2 className="text-xl mb-4">Подтверждение почты</h2>
             <p>Пожалуйста, подтвердите ваш адрес электронной почты, чтобы войти в систему.</p>

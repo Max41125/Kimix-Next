@@ -41,8 +41,8 @@ const Dashboard = () => {
         <h1 className="text-2xl font-bold mb-4">Добро пожаловать в ваш аккаунт!</h1>
         <div>
           {/* Здесь будет отображаться контент в зависимости от роли */}
-          {user.role === 'buyer' && <BuyerContent />}
-          {user.role === 'student' && <StudentContent  />}
+          {user.role === 'buyer' && <BuyerContent userId={user.id} userToken={token} />}
+          {user.role === 'student' && <StudentContent userId={user.id} userToken={token}  />}
           {user.role === 'seller' && <SellerContent userId={user.id} userToken={token} />}
           {/* Общая информация */}
           <div className="mt-4 p-4 border rounded bg-gray-100">

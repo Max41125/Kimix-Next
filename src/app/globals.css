@@ -15,3 +15,12 @@ body {
   flex-direction: column;
   padding: 2rem;
 }
+
+.checkout__product__image{
+
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+}
