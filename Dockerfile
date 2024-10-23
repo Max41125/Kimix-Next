@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # Указываем порт, который будет слушать Nginx
-EXPOSE 3000
+EXPOSE 4500
  
 # Запускаем сервер
 CMD ["npx", "serve", "out"]
