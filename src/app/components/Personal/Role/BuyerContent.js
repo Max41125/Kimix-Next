@@ -4,7 +4,7 @@ import { useUser } from '@/app/components/Auth/UserProvider';
 import { ReactSVG } from 'react-svg';
 import NotFound from '/public/notfound.svg';
 import Link from 'next/link';
-
+import Image from 'next/image';
 
 
 const BuyerContent = ({ userId, userToken }) => {

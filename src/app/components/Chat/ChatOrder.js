@@ -47,10 +47,15 @@ const ChatOrder = () => {
     // Подключение к Pusher и подписка на канал
     const pusher = new Pusher('a511ccd3ff6dbde81a48', {
       cluster: 'eu',
-    });
+      authEndpoint: 'https://test.kimix.space/broadcasting/auth',
+      auth: {
+        headers: {
+          Authorization: `Bearer ${token}`, // Токен пользователя
+        },
+    }});
 
     // Подписка на приватный канал
-    const channel = pusher.subscribe(`chat.${orderId}`);
+    const channel = pusher.subscribe(`private-chat.${orderId}`);
 
     // Обработка новых сообщений
     channel.bind('messageSent', (data) => {
@@ -65,7 +70,9 @@ const ChatOrder = () => {
         console.error('Invalid message format:', data);
       }
     });
-
+    channel.bind('pusher:subscription_succeeded', () => {
+      console.log('Successfully subscribed to channel: chat.' + orderId);
+    });
 
     return () => {
       channel.unbind_all();

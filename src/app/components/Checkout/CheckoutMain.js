@@ -6,6 +6,8 @@ import { useUser } from '@/app/components/Auth/UserProvider';
 import { ReactSVG } from 'react-svg';
 import Loader from '@/app/components/Loaders/Circle';
 import axios from 'axios';
+import Image from 'next/image';
+
 const CheckoutMain = () => {
   const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
   const { cart, clearCart } = useCart() || {};
