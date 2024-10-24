@@ -14,64 +14,37 @@ const ChatOrder = () => {
   const [message, setMessage] = useState('');
   const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
   const { user, token } = useUser() || { user: null, token: null };
-
+  
   useEffect(() => {
     if (!user || !token || !orderId) return;
 
-    // Получение CSRF-токена
-    const fetchCsrf = async () => {
-      await axios.get(csrfUrl, { withCredentials: true });
-    };
-
     const fetchMessages = async () => {
+      await axios.get(csrfUrl, { withCredentials: true });
+
       try {
-        await fetchCsrf();
-        const response = await axios.get(`https://test.kimix.space/api/auth/chat/${orderId}`, {
+        const response = await axios.get(`https://test.kimix.space/api/auth/chat/messages/${orderId}`, {
           headers: {
             Authorization: `Bearer ${token}`
           },
           withCredentials: true,
-          withXSRFToken: true,
         });
-
         setMessages(response.data);
       } catch (error) {
-        console.error('Error fetching messages:', error);
+        console.error('Ошибка при получении сообщений:', error);
       }
     };
 
     fetchMessages();
 
-
     Pusher.logToConsole = true;
-    // Подключение к Pusher и подписка на канал
     const pusher = new Pusher('a511ccd3ff6dbde81a48', {
       cluster: 'eu',
-      authEndpoint: 'https://test.kimix.space/broadcasting/auth',
-      auth: {
-        headers: {
-          Authorization: `Bearer ${token}`, // Токен пользователя
-        },
-    }});
-
-    // Подписка на приватный канал
-    const channel = pusher.subscribe(`private-chat.${orderId}`);
-
-    // Обработка новых сообщений
-    channel.bind('messageSent', (data) => {
-      console.log('Event MessageSent received');
-      console.log('Received data:', data);
-      if (data && data.user_id && data.message) {
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { user_id: data.user_id, message: data.message, id: Date.now() } // Используйте Date.now() для уникального ID
-        ]);
-      } else {
-        console.error('Invalid message format:', data);
-      }
     });
-    channel.bind('pusher:subscription_succeeded', () => {
-      console.log('Successfully subscribed to channel: chat.' + orderId);
+
+    const channel = pusher.subscribe(`chat.${orderId}`);
+
+    channel.bind('messageSent', (data) => {
+      setMessages((prevMessages) => [...prevMessages, data]);
     });
 
     return () => {
@@ -85,12 +58,12 @@ const ChatOrder = () => {
     try {
       await axios.post('https://test.kimix.space/api/auth/send-message', {
         message,
-        user_id: user.id, 
-        order_id: orderId, 
+        user_id: user.id,
+        username: user.name,
+        order_id: orderId,
       }, {
         headers: {
           Authorization: `Bearer ${token}`,
-     
         },
         withCredentials: true,
       });
@@ -105,23 +78,31 @@ const ChatOrder = () => {
   }
 
   return (
-    <div>
-      <h2>Chat for Order ID: {orderId}</h2>
-      <div>
+    <div className="p-6 bg-gray-100 rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold mb-4">Chat for Order ID: {orderId}</h2>
+      <div className="h-96 overflow-y-auto mb-4 p-4 bg-white rounded-md shadow-inner">
         {messages.map((msg) => (
-          <div key={msg.id}>
-            <strong>{msg.user_id}: </strong>
-            {msg.message}
+          <div key={msg.id} className="mb-2">
+            <strong className="text-blue-600">{msg.username}: </strong>
+            <span className="text-gray-800">{msg.message}</span>
           </div>
         ))}
       </div>
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type your message"
-      />
-      <button onClick={handleSendMessage}>Send</button>
+      <div className="flex">
+        <input
+          type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Type your message"
+          className="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button 
+          onClick={handleSendMessage}
+          className="ml-2 p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200"
+        >
+          Отправить
+        </button>
+      </div>
     </div>
   );
 };
