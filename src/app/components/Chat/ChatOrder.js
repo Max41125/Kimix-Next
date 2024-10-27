@@ -80,7 +80,22 @@ const ChatOrder = () => {
 
   const handleSendMessage = async () => {
     if (!message) return;
-    // Логика для отправки сообщения
+    try {
+      await axios.post('https://test.kimix.space/api/auth/send-message', {
+        message,
+        user_id: user.id,
+        username: user.name,
+        order_id: orderId,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+      setMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
   const handleFileChange = (e) => {
