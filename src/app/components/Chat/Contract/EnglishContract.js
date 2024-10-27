@@ -7,6 +7,7 @@ const EnglishContract = ({ orderId, currentDate }) => {
 
 
     return (
+        <>
         <div>
             <h1 className='font-bold text-2xl mb-8'>
           
@@ -57,7 +58,7 @@ const EnglishContract = ({ orderId, currentDate }) => {
             <h2>1. SALE AND PURCHASE</h2>
         
             <p>
-                1.1. The Parties, in accordance with this Contract, agree on the terms under which the Supplier intends to sell, and the Buyer intends to buy cosmetic raw materials, hereinafter referred to as the "Goods".
+                1.1. The Parties, in accordance with this Contract, agree on the terms under which the Supplier intends to sell, and the Buyer intends to buy cosmetic raw materials, hereinafter referred to as the &quot;Goods&quot;.
             </p>
             
             <p>
@@ -126,7 +127,7 @@ const EnglishContract = ({ orderId, currentDate }) => {
                 4.1. The Goods packaging shall ensure complete safety of the Goods during transportation and carriage by any means of transport, and during the Goods loading, reloading and unloading.
                 <br/>
                 <br/>
-                4.2. In the event of the Goods damage due to improper packaging, both Parties shall jointly verify the Goods damage cause and agree the compensation amount to be paid by the Supplier, in case the Supplier's fault is proved.
+                4.2. In the event of the Goods damage due to improper packaging, both Parties shall jointly verify the Goods damage cause and agree the compensation amount to be paid by the Supplier, in case the Supplier&quot;s fault is proved.
                 <br/>
                 <br/>
                 4.2.1. The Supplier is not liable for any Goods defects occurred due to improper storage, transportation, loading or unloading performed by the Buyer or the Carrier.
@@ -148,7 +149,7 @@ const EnglishContract = ({ orderId, currentDate }) => {
                 5.3. Quality of the supplied Goods in addition to complying with the requirements of p. 5.1 of the Contract shall be confirmed by Certificates of Conformity issued in the country of origin of the Goods provided by the Supplier at request of the Buyer.  	
                 <br/>
                 <br/>
-                5.4. The Supplier sets the expiration date for the Goods – 3 months from the date of receipt of the Goods at the Buyer's warehouse.	
+                5.4. The Supplier sets the expiration date for the Goods – 3 months from the date of receipt of the Goods at the Buyer&quot;s warehouse.	
                 
             </p>
             
@@ -167,7 +168,7 @@ const EnglishContract = ({ orderId, currentDate }) => {
                 6.2. The Buyer shall assert a claim to the Supplier as to quantity, quality (for apparent damages), and assortment of the supplied Goods not later than 10 days from the date of receiving the Goods in the Buyer or the Processor stock subject to delivery terms. If the production or hidden defect is not possible to identify at the moment of receiving the Goods, the claims shall be sent within the Warranty Period set in the clause 5.4. of the  Contract. 
                 <br/>
                 <br/>
-                6.3. In addition to the obligations set out in clause 5.2. of the Contract, the Supplier, at the request of the Buyer, undertakes to reimburse the Buyer's expenses associated with the supply of low-quality Goods, including all transportation, storage, customs and other costs associated with the supply, disposal of low-quality or non-compliant Goods. The Buyer is obliged to store the Goods to be replaced until the completion of the inspection by the Supplier, but not more than three months from the date of discovery of defects in the Goods, with the right to dispose of it at the end of this period, even if the inspection is not completed.
+                6.3. In addition to the obligations set out in clause 5.2. of the Contract, the Supplier, at the request of the Buyer, undertakes to reimburse the Buyer&quot;s expenses associated with the supply of low-quality Goods, including all transportation, storage, customs and other costs associated with the supply, disposal of low-quality or non-compliant Goods. The Buyer is obliged to store the Goods to be replaced until the completion of the inspection by the Supplier, but not more than three months from the date of discovery of defects in the Goods, with the right to dispose of it at the end of this period, even if the inspection is not completed.
                 <br/>
                 <br/>
                 6.4. Upon agreement of the Parties, the compensation, in cases specified in the Contract, can be paid to the Buyer, if the Supplier has issued the credit-note with decreased payment amount for the delivered Goods or the advance payment for delivery of the following lot of the Goods. 
@@ -241,6 +242,7 @@ const EnglishContract = ({ orderId, currentDate }) => {
                 11.4. The present Contract is made up in English and Russian languages in two counterparts, one copy for each Party. Both English and Russian versions of the present Contract are equivalent and original. In case of any discrepancies found by the Parties in the Contract Russian version will prevail.
             </p>
         </div>
+        </>
     );
 };
 
