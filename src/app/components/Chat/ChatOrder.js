@@ -30,6 +30,7 @@ const ChatOrder = () => {
         const response = await axios.get(`https://test.kimix.space/api/auth/chat/messages/${orderId}`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
+          withXSRFToken:true,
         });
         setMessages(response.data);
       } catch (error) {
@@ -42,6 +43,7 @@ const ChatOrder = () => {
         const response = await axios.get(`https://test.kimix.space/api/auth/chat/documents/${orderId}`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
+          withXSRFToken:true,
         });
         setDocuments(response.data);
       } catch (error) {
@@ -54,6 +56,7 @@ const ChatOrder = () => {
         const response = await axios.get(`https://test.kimix.space/api/auth/chat/contract/status/${orderId}`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
+          withXSRFToken:true,
         });
         setContractStatus(response.data.status);
       } catch (error) {
@@ -91,6 +94,7 @@ const ChatOrder = () => {
           Authorization: `Bearer ${token}`,
         },
         withCredentials: true,
+        withXSRFToken:true,
       });
       setMessage('');
     } catch (error) {
@@ -117,6 +121,7 @@ const ChatOrder = () => {
           'Content-Type': 'multipart/form-data',
         },
         withCredentials: true,
+        withXSRFToken:true,
       });
       setSelectedFile(null);
       fetchDocuments();
