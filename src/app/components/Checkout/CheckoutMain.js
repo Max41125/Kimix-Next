@@ -77,17 +77,14 @@ const CheckoutMain = () => {
     };
 
     try {
-      await axios.get(csrfUrl, {
-        withCredentials: true,
-    });
+      await axios.get(csrfUrl, { withCredentials: true });
       const response = await axios.post('https://test.kimix.space/api/orders', orderData, {
-        headers: {
-          Authorization: `Bearer ${token}`,  // Авторизация через токен
-        },
+        headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
         withXSRFToken:true,
-
       });
+
+      
 
       console.log('Order submitted:', response.data);
       clearCart();  // Очищаем корзину после успешного заказа
