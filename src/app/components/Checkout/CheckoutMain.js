@@ -79,16 +79,14 @@ const CheckoutMain = () => {
     try {
       await axios.get(csrfUrl, {
         withCredentials: true,
-
     });
       const response = await axios.post('https://test.kimix.space/api/orders', orderData, {
         headers: {
           Authorization: `Bearer ${token}`,  // Авторизация через токен
-          'Content-Type': 'application/json',
         },
-      },{
         withCredentials: true,
         withXSRFToken:true,
+
       });
 
       console.log('Order submitted:', response.data);
