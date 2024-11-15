@@ -22,7 +22,11 @@ const ChemicalList = ({ chemicals }) => { // Измените на chemicals
             {chemical.image ? (
                 <ReactSVG 
                   src={`data:image/svg+xml;utf8,${encodeURIComponent(chemical.image)}`} 
-                  className=" w-full items-center  flex flex-col"  // Задаем ширину и высоту
+                  className=" w-full items-center  flex flex-col" 
+                  beforeInjection={(svg) => {
+                    svg.classList.add('svg__image');
+                  }}
+
                 />
               ) : (
                 <Image
@@ -36,12 +40,12 @@ const ChemicalList = ({ chemicals }) => { // Измените на chemicals
               )}
 
           </div>
-          <Link href={`/chemical?id=${chemical.id}`}>
-            <h3 className="text-lg font-bold">{chemical.title}</h3>
-          </Link>
+
+          <h3 className="text-lg font-bold">{chemical.title} / {chemical.russian_common_name}</h3>
+
           {chemical.cas_number && <p className="text-left mb-2">CAS: {chemical.cas_number}</p>}
-          {chemical.formula && <p className="text-left mb-2">Formula: {chemical.formula}</p>}
-          {chemical.molecular_weight && <p className="text-left  mb-2">Molecular Weight: {chemical.molecular_weight}</p>}
+          {chemical.formula && <p className="text-left mb-2">Формула: {chemical.formula}</p>}
+          
 
           <Link 
             href={`/chemical?id=${chemical.id}`} 

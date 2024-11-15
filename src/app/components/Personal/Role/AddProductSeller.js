@@ -122,15 +122,47 @@ const SellerContent = ({ userId, userToken }) => {
       setSelectedUnits({});
       setProductPrices({});
       setCurrencyUnits({});
+      
+      const response = await axios.get(`https://test.kimix.space/api/users/${userId}/products`, {
+        headers: {
+          Authorization: `Bearer ${userToken}` // Включаем токен в заголовок
+        }
+      });
+      const products = response.data;
+      setUserProducts(products); // Сохраняем данные о товарах пользователя
+
+
+
+
     } catch (error) {
       console.error("Ошибка при обновлении товаров:", error);
     }
   };
 
+  const getCurrencySymbol = (currency) => {
+    switch (currency) {
+      case 'RUB': return '₽';
+      case 'USD': return '$';
+      case 'EUR': return '€';
+      case 'CNY': return '¥';
+      default: return currency;
+    }
+  };
+
+
+  const translateUnitType = (unitType) => {
+    switch (unitType) {
+      case 'grams': return 'Гр.';
+      case 'kilograms': return 'Кг.';
+      case 'tons': return 'Т.';
+      case 'pieces': return 'Шт.';
+      default: return unitType;
+    }
+  };
   return (
     <>
       <div className="p-4">
-        <h2 className="text-lg font-bold">Контент для покупателя</h2>
+        <h2 className="text-lg font-bold">Добавление товаров</h2>
         <input
           type="text"
           value={searchTerm}
@@ -139,11 +171,11 @@ const SellerContent = ({ userId, userToken }) => {
           className="border border-gray-300 p-2 rounded w-full"
         />
         {chemicals.length > 0 && (
-          <ul className="mt-2 border border-gray-300 rounded max-h-96 overflow-y-auto">
+          <ul className="mt-2 border border-gray-300 bg-white  rounded max-h-96 overflow-y-auto">
             {chemicals.map((chemical) => (
               <li
                 key={chemical.id}
-                className={`p-2 cursor-pointer hover:bg-gray-200 ${selectedProducts.some(product => product.id === chemical.id) ? 'bg-gray-300' : ''}`}
+                className={`p-2 cursor-pointer transition hover:bg-gray-200 ${selectedProducts.some(product => product.id === chemical.id) ? 'bg-gray-300' : ''}`}
                 onClick={() => handleSelectProduct(chemical.id, chemical.title)}
               >
                 <p>Название: {chemical.title}</p>
@@ -154,11 +186,11 @@ const SellerContent = ({ userId, userToken }) => {
           </ul>
         )}
         {selectedProducts.length > 0 && (
-          <div className="mt-4">
-            <h3 className="font-semibold">Выбранные товары:</h3>
+          <div className="mt-4 bg-white rounded-lg">
+            <h3 className="font-semibold p-4">Выбранные товары:</h3>
             <ul>
               {selectedProducts.map((product) => (
-                <li key={product.id} className="flex border-gray-100 p-4 items-center justify-between">
+                <li key={product.id} className="flex  border-gray-100 p-4 items-center justify-between">
                   <span>{product.title}</span>
                   <div className="flex items-center">
                     <select
@@ -206,19 +238,19 @@ const SellerContent = ({ userId, userToken }) => {
           className="mt-4 bg-teal-500 text-white font-bold py-2 px-4 rounded hover:bg-teal-600"
           style={{ backgroundColor: '#14D8B5' }}
         >
-          Отправить
+          Добавить товары
         </button>
       </div>
 
-      <div className="p-4">
+      <div className="lg:p-4 p-2">
         <h2 className="text-lg font-bold">Ваши товары</h2>
         {userProducts.length > 0 ? (
-          <ul className="mt-2 border border-gray-300 rounded overflow-y-auto flex flex-col gap-5">
+          <ul className="mt-2  overflow-y-auto flex flex-col gap-5">
             {userProducts.map((product) => (
-              <li key={product.id} className="p-2 flex justify-between items-center">
-                <div>
-                  <p>Название: {product.title}</p>
-                  <div className="flex justify-center items-center w-full h-40 mb-4 border rounded">
+              <li key={product.id} className="p-2 flex lg:flex-row flex-col gap-2 bg-white rounded-xl justify-between items-center">
+                <div className='flex lg:flex-row flex-col gap-2 w-full'>
+                  
+                  <div className="flex justify-center items-center lg:w-48 w-full h-40  border rounded">
                     {product.image ? (
                       <ReactSVG 
                         src={`data:image/svg+xml;utf8,${encodeURIComponent(product.image)}`} 
@@ -233,13 +265,16 @@ const SellerContent = ({ userId, userToken }) => {
                       />
                     )}
                   </div>
-
-                  <p>CAS Number: {product.cas_number}</p>
-                  <p>Формула: {product.formula}</p>
+                  <div className='flex flex-col gap-2'>
+                    <p>Название: {product.russian_common_name} / ({product.title})</p>
+                    <p>CAS Number: <strong>{product.cas_number}</strong></p>
+                    <p>Формула: <strong>{product.formula}</strong></p>
+                    <p>Цена: <strong> {product.pivot.price} {getCurrencySymbol(product.pivot.currency)} </strong> за Eд. {translateUnitType(product.pivot.unit_type)}</p>
+                  </div>
                 </div>
                 <button
                   onClick={() => handleRemoveProductStore(product.id)}
-                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                  className="bg-red-500 text-white lg:w-24 w-full px-2 py-1 rounded hover:bg-red-600"
                 >
                   Удалить
                 </button>

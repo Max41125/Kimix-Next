@@ -98,7 +98,7 @@ const CartList = () => {
         >
           Очистить корзину
         </button>
-        <Link href="/checkout" className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-300">
+        <Link href="/checkout" className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 active:scale-105  transition duration-300">
           Оформить заказ
         </Link>
       </div>

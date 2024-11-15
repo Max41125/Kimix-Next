@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useUser } from '@/app/components/Auth/UserProvider';
 import { ReactSVG } from 'react-svg';
 import NotFound from '/public/notfound.svg';
 import Link from 'next/link';
 import Image from 'next/image';
+import Loader from '../../Loaders/Circle';
 
-
-const BuyerContent = ({ userId, userToken }) => {
+const OrdersSeller = ({ userId, userToken }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,7 +21,7 @@ const BuyerContent = ({ userId, userToken }) => {
     const fetchOrders = async () => {
       try {
         await axios.get(csrfUrl, { withCredentials: true });
-        const response = await axios.get(`https://test.kimix.space/api/user/${userId}/orders/`, {
+        const response = await axios.get(`https://test.kimix.space/api/seller/${userId}/orders/`, {
 
           headers: {
             Authorization: `Bearer ${userToken}`
@@ -45,7 +44,7 @@ const BuyerContent = ({ userId, userToken }) => {
   }, [userId]);
 
   if (loading) {
-    return <p>Loading orders...</p>;
+    return <Loader />;
   }
 
   if (error) {
@@ -54,7 +53,7 @@ const BuyerContent = ({ userId, userToken }) => {
 
   return (
     <div className="w-full my-8 p-4 bg-white shadow rounded-lg">
-      <h2 className="text-2xl font-bold mb-6">Ваши заказы</h2>
+      <h2 className="text-2xl font-bold mb-6">Заказы покупателей</h2>
       {orders?.length > 0 ? (
         <ul className="space-y-4">
           {orders.map(order => (
@@ -100,7 +99,7 @@ const BuyerContent = ({ userId, userToken }) => {
                           <Link
                           href={`/dashboard/chat?orderId=${order.id}`}
                           className=' p-4 rounded-full bg-gray-300 transition transition-colors hover:bg-indigo-400'>
-                            Чат с продавцом
+                            Чат с покупателем
                           </Link>
 
                         </div>
@@ -125,4 +124,4 @@ const BuyerContent = ({ userId, userToken }) => {
   );
 };
 
-export default BuyerContent;
+export default OrdersSeller;
