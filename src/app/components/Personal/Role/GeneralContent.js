@@ -47,6 +47,7 @@ const GeneralContent = ({ userName, userEmail, userId, userToken, userRole }) =>
             Authorization: `Bearer ${userToken}`,
           },
           withCredentials: true,
+          withXSRFToken:true,
         });
 
         const data = response.data;
@@ -88,6 +89,7 @@ const GeneralContent = ({ userName, userEmail, userId, userToken, userRole }) =>
           Authorization: `Bearer ${userToken}`,
         },
         withCredentials: true,
+        withXSRFToken:true,
       });
 
       alert('Данные успешно сохранены.');
