@@ -33,3 +33,22 @@ body {
   flex-direction: column;
   padding: 4px;
 }
+
+.progress__Line{
+
+  position: relative;
+}
+
+.progress__Line::after{
+  z-index: 0;
+  position: absolute;
+  display: inline-block;
+  width: 100%;
+  height: 1px;
+  background-color: rgb(209 213 219);
+  content: "";
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+
+}

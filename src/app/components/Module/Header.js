@@ -75,10 +75,10 @@ const Header = () => {
 
             {/* Выпадающее меню для авторизованного пользователя */}
             {user && isDropdownOpen && (
-              <div className="absolute right-0 bg-white shadow-md rounded mt-2 w-48">
+              <div className="absolute z-20 right-0 bg-white shadow-md rounded mt-2 w-64">
                 <p className="px-4 py-2" >Доброго дня {user.name}</p>
-                <Link href="/dashboard" className="block px-4 py-2 hover:bg-gray-200">Личный кабинет</Link>
-                <button onClick={handleLogout} className="block w-full text-left px-4 py-2 hover:bg-gray-200">Выйти</button>
+                <Link href="/dashboard" className="block px-4 py-2 transition hover:bg-gray-200">Личный кабинет</Link>
+                <button onClick={handleLogout} className="block w-full text-left px-4 py-2 transition hover:bg-gray-200">Выйти</button>
               </div>
             )}
           </div>

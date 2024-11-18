@@ -12,6 +12,8 @@ import { GiPaperClip } from "react-icons/gi";
 import SendIcon from '/public/send.svg';
 import Image from 'next/image';
 import { RxCross1 } from 'react-icons/rx';
+import OrderProgressLine from '@/app/components/Personal/OrderProgressLine';
+
 
 const ChatOrder = () => {
   const searchParams = useSearchParams();
@@ -57,7 +59,7 @@ const ChatOrder = () => {
 
     const fetchContractStatus = async () => {
       try {
-        const response = await axios.get(`https://test.kimix.space/api/auth/chat/contract/status/${orderId}`, {
+        const response = await axios.get(`https://test.kimix.space/api/orders/${orderId}/status`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
           withXSRFToken:true,
@@ -142,47 +144,7 @@ const ChatOrder = () => {
     return <Loader />;
   }
 
-  const renderContractStatusIcon = () => {
-    switch (contractStatus) {
-      case 'filled':
-      case 'not_filled':
-        return (
-          <span className="inline-block w-3 h-3 rounded-full bg-blue-500 animate-pulse mr-2"></span>
-        );
-      case 'under_review':
-        return (
-          <span className="inline-block w-3 h-3 mr-2">
-            <svg
-              className="text-green-500 w-4 h-4"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="2"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m2 9a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </span>
-        );
-      case 'canceled':
-        return (
-          <span className="inline-block w-3 h-3 mr-2">
-            <svg
-              className="text-red-500 w-4 h-4"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="2"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
+
   const handleDeleteFile = () => {
     if (!selectedFile) return;
   
@@ -245,28 +207,38 @@ const ChatOrder = () => {
       </div>
 
       <div className="p-6 bg-gray-100 rounded-lg shadow-md w-4/12 flex flex-col gap-2">
-        <p className="text-xl font-semibold">Информация по заказу</p>
-        <div className="bg-white p-2 flex flex-col rounded-xl">
-          <p>Документы по заказу</p>
-          {documents.map((doc) => (
-            <a
-              key={doc.id}
-              href={`https://test.kimix.space${doc.path}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:underline"
-            >
-              {doc.filename}
-            </a>
-          ))}
-        </div>
+        <p className="text-xl font-semibold">Статус заказа</p>
+        <OrderProgressLine status={contractStatus} />
 
-        <div className="mt-4">
+
+      
+        {documents?.length > 0 && (
+          <div className="bg-white p-2 flex flex-col rounded-xl">
+            <p>Документы по заказу</p>
+            {documents.map((doc) => (
+              <a
+                key={doc.id}
+                href={`https://test.kimix.space${doc.path}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline"
+              >
+                {doc.filename}
+              </a>
+            ))}
+            </div>
+
+
+        )}
+
+    
+
+        <div className="mt-4 bg-white rounded-lg bg-white rounded-xl">
           <div
             className={`flex items-center p-2 cursor-pointer rounded-lg bg-white rounded-xl group`}
             onClick={toggleContract}
           >
-            {renderContractStatusIcon()}
+          
             <span className="font-semibold">Интерактивный контракт</span>
             <TbHandClick
               fontSize={30}
