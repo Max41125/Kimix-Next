@@ -51,6 +51,21 @@ const OrdersSeller = ({ userId, userToken }) => {
     return <p>{error}</p>;
   }
 
+  const translateStatus = (status) => {
+
+    switch (status) {
+      case 'new': return 'Новый заказ';
+      case 'contract_verification': return 'Проверка контракта';
+      case 'waiting_payment': return 'Ожидание оплаты';
+      case 'packing': return 'Комплектация¥';
+      case 'shipping': return 'Отгрузка';
+      case 'shipped': return 'Отгружен';
+      default: return status;
+    }
+
+  };
+
+
   return (
     <div className="w-full my-8 p-4 bg-white shadow rounded-lg">
       <h2 className="text-2xl font-bold mb-6">Заказы покупателей</h2>
@@ -58,14 +73,25 @@ const OrdersSeller = ({ userId, userToken }) => {
         <ul className="space-y-4">
           {orders.map(order => (
             <li key={order.id} className="p-4 border rounded-lg shadow-sm bg-gray-50">
-              <div className="mb-2">
-                <span className="font-semibold">ID заказа:</span> {order.id}
-              </div>
-              <div className="mb-2">
-                <span className="font-semibold">Общая сумма:</span> {order.total_price} {order.currency}
-              </div>
-              <div className="mb-4">
-                <span className="font-semibold">Дата создания:</span> {new Date(order.created_at).toLocaleDateString()}
+              <div className='flex flex-row justify-between'>
+                <div className='flex flex-col'>
+                  <div className="mb-2">
+                    <span className="font-semibold">ID заказа:</span> {order.id}
+                  </div>
+                  <div className="mb-2">
+                    <span className="font-semibold">Общая сумма:</span> {order.total_price} {order.currency}
+                  </div>
+                  <div className="mb-4">
+                    <span className="font-semibold">Дата создания:</span> {new Date(order.created_at).toLocaleDateString()}
+                  </div>
+                </div>
+
+                <div className='flex flex-col'>
+                  <span className='py-2 px-4 bg-blue-200 rounded-full' >
+                    {translateStatus(order.status)}
+                  </span>
+                </div>
+
               </div>
               {order.products.length > 0 ? (
                 <div className="mt-4">

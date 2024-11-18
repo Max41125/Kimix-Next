@@ -70,7 +70,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
 
     if (!isLoginMode) {
       if (!name) {
-        newErrors.name = 'Имя обязательно';
+        newErrors.name = 'ФИО обязательно';
       }
 
       if (confirmPassword !== password) {
@@ -212,7 +212,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
                 <div>
                   <input
                     type="text"
-                    placeholder="Имя"
+                    placeholder="ФИО"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className={`border rounded w-full p-2 mb-2 ${errors.name ? 'border-red-500' : ''}`}

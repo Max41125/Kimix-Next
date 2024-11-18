@@ -21,7 +21,7 @@ const Dashboard = () => {
   const renderContent = () => {
     switch (activeSection) {
       case 'general':
-        return <GeneralContent userName={user.name} userEmail={user.email} />;
+        return <GeneralContent userId={user.id} userToken={token} userName={user.name} userEmail={user.email} userRole={user.role} />;
       case 'OrdersBuyer':
         return <OrdersBuyer userId={user.id} userToken={token} />;
       case 'student':

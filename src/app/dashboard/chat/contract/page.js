@@ -5,14 +5,22 @@ import { useSearchParams } from 'next/navigation';
 import RussianContract from '@/app/components/Chat/Contract/RussianContract';
 import EnglishContract from '@/app/components/Chat/Contract/EnglishContract';
 import Loader from '@/app/components/Loaders/Loader';
+import Header from '@/app/components/Module/Header';
+import { UserProvider } from '@/app/components/Auth/UserProvider';
 
 const ContractPage = () => {
   // Wrap useSearchParams in a Suspense boundary
   return (
-    <Suspense fallback={<Loader />}>
-      <SearchParamsWrapper />
-    </Suspense>
+    <>
+    <UserProvider>
+      <Header />
+      <Suspense fallback={<Loader />}>
+        <SearchParamsWrapper />
+      </Suspense>
+    </UserProvider>
+    </>
   );
+ 
 };
 
 // A separate component to handle search params and conditional rendering

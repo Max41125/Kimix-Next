@@ -7,7 +7,7 @@ import { ReactSVG } from 'react-svg';
 import Loader from '@/app/components/Loaders/Circle';
 import axios from 'axios';
 import Image from 'next/image';
-
+import NotFound from '/public/notfound.svg';
 const CheckoutMain = () => {
   const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
   const { cart, clearCart } = useCart() || {};

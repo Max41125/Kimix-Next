@@ -1,6 +1,212 @@
-import React from 'react';
+'use client';
+
+import React, {useState, useRef, useEffect} from 'react';
+import axios from 'axios';
+import Loader from '@/app/components/Loaders/Loader';
+import { useUser } from '@/app/components/Auth/UserProvider';
+
 
 const RussianContract = ({ orderId, currentDate }) => {
+    const [order, setOrder] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [supplier, setSupplier] = useState(null);
+    const { user, token } = useUser() || { user: null, token: null };
+    const [products , setProducts] = useState(null);
+    const [formDataSupplier, setFormDataSupplier] = useState({
+        type: '',
+        full_name: '',
+        short_name: '',
+        legal_address: '',
+        actual_address: '',
+        email: '',
+        phone: '',
+        inn: '',
+        ogrn: '',
+        bank_name: '',
+        bik: '',
+        corr_account: '',
+        settlement_account: '',
+        okved: '',
+        tax_system: '',
+        kpp: '',
+        ogrn: '',
+        director: '',
+        chief_accountant: '',
+        authorized_person: '',
+      });
+
+
+      const [formDataUser, setFormDataUser] = useState({
+        name: '',
+        city: '',
+        street: '',
+        house: '',
+        building: '',
+        office: '',
+        email: '',
+        phone: '',
+        inn: '',
+      });
+      const canvasRef = useRef(null);
+      const [isDrawing, setIsDrawing] = useState(false);
+    
+      // Начало рисования
+      const startDrawing = (e) => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.beginPath();
+        ctx.moveTo(
+          e.nativeEvent.offsetX,
+          e.nativeEvent.offsetY
+        );
+        setIsDrawing(true);
+      };
+    
+      // Рисование
+      const draw = (e) => {
+        if (!isDrawing) return;
+    
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.lineTo(
+          e.nativeEvent.offsetX,
+          e.nativeEvent.offsetY
+        );
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      };
+    
+      // Конец рисования
+      const stopDrawing = () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.closePath();
+        setIsDrawing(false);
+      };
+    
+      // Очистка canvas
+      const clearCanvas = () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      };
+    
+      // Сохранение подписи как изображения
+      const saveSignature = () => {
+        const canvas = canvasRef.current;
+        const dataURL = canvas.toDataURL('image/png');
+        console.log("Saved Signature URL: ", dataURL);
+        // Отправьте `dataURL` на сервер или используйте его дальше
+      };
+
+
+
+
+
+    const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+  
+    useEffect(() => {
+        if (!user || !token || !orderId) return;
+      
+        const fetchOrder = async () => {
+          try {
+            // Fetch CSRF token
+            await axios.get(csrfUrl, { withCredentials: true });
+      
+            // Fetch order details
+            const responseOrder = await axios.get(
+              `https://test.kimix.space/api/user/order/${orderId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+                withCredentials: true,
+                withXSRFToken: true,
+              }
+            );
+            const dataOrder = responseOrder.data;
+            setOrder(dataOrder);
+            setProducts(dataOrder.products);
+            // Extract supplier ID from the first product (if applicable)
+            const firstProduct = dataOrder?.products?.[0];  // Проверяем, есть ли продукт
+            const supplierId = firstProduct?.pivot?.supplier_id;
+            
+
+            if (supplierId) {
+              // Fetch supplier details
+              const responseSupplier = await axios.get(
+                `https://test.kimix.space/api/seller/${supplierId}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                  withCredentials: true,
+                  withXSRFToken: true,
+                }
+              );
+      
+              const supplierData = responseSupplier.data;
+              setSupplier(supplierData);
+      
+              if (supplierData) {
+                setFormDataSupplier((prevData) => ({
+                  ...prevData,
+                  ...supplierData,
+                }));
+              }
+            }
+      
+            // Обновляем данные пользователя, используя первый адрес
+            if (dataOrder?.user?.user_addresses?.length > 0) {
+              const userAddress = dataOrder.user.user_addresses[0]; // Берем первый адрес
+              setFormDataUser((prevData) => ({
+                ...prevData,
+                name: dataOrder.user.name,
+                city: userAddress.city,
+                street: userAddress.street,
+                house: userAddress.house,
+                building: userAddress.building,
+                office: userAddress.office,
+                email: dataOrder.user.email,
+                phone: userAddress.phone,
+                inn: userAddress.inn,
+              }));
+            }
+      
+            setLoading(false);
+          } catch (err) {
+            setError(err.response?.data?.message || 'Failed to fetch orders.');
+            setLoading(false);
+          }
+        };
+      
+        fetchOrder();
+      }, [orderId, token]);
+  
+    if (loading) return <Loader/>;
+    if (error) return <div>Error: {error}</div>;
+    const getCurrencySymbol = (currency) => {
+      switch (currency) {
+        case 'RUB': return '₽';
+        case 'USD': return '$';
+        case 'EUR': return '€';
+        case 'CNY': return '¥';
+        default: return currency;
+      }
+    };
+  
+    const translateUnitType = (unitType) => {
+      switch (unitType) {
+        case 'grams': return 'Гр.';
+        case 'kilograms': return 'Кг.';
+        case 'tons': return 'Т.';
+        case 'pieces': return 'Шт.';
+        default: return unitType;
+      }
+    };
+
 
 
   return (
@@ -31,23 +237,32 @@ const RussianContract = ({ orderId, currentDate }) => {
 
         <p>Настоящий Контракт составлен между</p>
         <p>
-            <input type="text" id="supplierEN" placeholder="__________________________" /> 
-            находящимся по адресу
-            <input type="text" id="supplierAddressEN" placeholder="______________________________________" />
+            <b>{formDataSupplier.full_name}</b> находящимся по адресу: <b>{formDataSupplier.legal_address}</b>
         </p>
 
         <p>
-        в лице <input type="text" id="supplierRepresentativeEN" placeholder="____________________" /> 
+        в лице <b>
+              {formDataSupplier.authorized_person || ''} 
+              {formDataSupplier.short_name || ''}
+          </b>
         , действующего на основании документов компании, именуемой в дальнейшем «Поставщик»
         </p>
 
-        <p>и <input type="text" id="buyerEN" placeholder="__________________________" />,</p>
+        <p>и <b>{formDataUser.name}</b>,</p>
 
         <p>
-        находящемуся по адресу: <input type="text" id="buyerAddressEN" placeholder="______________________________________" />.
+        находящемуся по адресу: 
+        <b>
+        {formDataUser.city && `г. ${formDataUser.city} `}
+        {formDataUser.street && `ул. ${formDataUser.street} `}
+        {formDataUser.house && `д. ${formDataUser.house} `}
+        {formDataUser.building && `стр. ${formDataUser.building} `}
+        {formDataUser.office && `оф. ${formDataUser.office}`}
+        </b>
+        .
         </p>
         <p>
-        в лце Генерального директора <input type="text" id="buyerRepresentativeEN" placeholder="____________________" />, 
+        в лице Генерального директора <input type="text" id="buyerRepresentativeEN" placeholder="____________________" /> 
         , действующего на основании Устава, именуемый в дальнейшем «Покупатель».
         </p>
 
@@ -237,6 +452,218 @@ const RussianContract = ({ orderId, currentDate }) => {
             <br/>
             11.4. Настоящий Контракт составлен на английском и русском языках в двух экземплярах, по одному экземпляру для каждой Стороны. Обе - английская и русская версии настоящего Контракта идентичны и оригинальны. В случае разночтений между Сторонами по Контракту превалирует версия на русском языке.
         </p>
+
+
+        <table className="mt-6 table-auto border-collapse border border-gray-300 w-full">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border border-gray-300 px-4 py-2">№</th>
+              <th className="border border-gray-300 px-4 py-2">Название</th>
+              <th className="border border-gray-300 px-4 py-2">Цена за единицу без НДС</th>
+              <th className="border border-gray-300 px-4 py-2">Количество</th>
+              <th className="border border-gray-300 px-4 py-2">Ед. измерения</th>
+              <th className="border border-gray-300 px-4 py-2">Сумма без НДС</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products && products.length > 0 ? (
+              products.map((product, index) => (
+           
+                <tr key={product.id} className="text-center">
+                  <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
+                  <td className="border border-gray-300 px-4 py-2">{product.russian_common_name}</td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {product.pivot?.price} {getCurrencySymbol(product.pivot?.currency)}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">{product.pivot?.quantity}</td>
+                  <td className="border border-gray-300 px-4 py-2">{translateUnitType(product.pivot?.unit_type)}</td>
+                  <td className="border border-gray-300 px-4 py-2">
+                  {product.pivot?.quantity && product.pivot?.price 
+                  ? (product.pivot.quantity * product.pivot.price).toFixed(2)
+                  : '-'} {getCurrencySymbol(product.pivot?.currency)}
+
+                  </td>
+
+                </tr>
+
+               
+              ))
+
+            ) : (
+              <tr>
+                <td colSpan="6" className="border border-gray-300 px-4 py-2 text-center">
+                  Продукты не найдены
+                </td>
+              </tr>
+            )}
+              <tr className="text-center">
+                <td colSpan="5" className="border border-gray-300 px-4 py-2">
+                  <b>Итого</b>
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {order.total_price} {getCurrencySymbol(order.currency)}
+                </td>
+
+              </tr>
+          </tbody>
+        </table>
+        
+
+        <div className='my-6'>
+            <h2 className='font-bold text-2xl text-center'>ПОДПИСИ СТОРОН:</h2>
+
+            <div className='flex flex-row justify-between my-6'>
+
+              <div key='seller' className='flex flex-col gap-2 border-gray-300 border-r-2 w-1/2'>
+
+                <p className='font-bold text-xl'>Поставщик</p>
+
+                {formDataSupplier.short_name && (
+                  <p>
+                   {formDataSupplier.short_name}
+                  </p>
+                )}
+                {formDataSupplier.phone && (
+                  <p>
+                    Телефон: <span className="underline">{formDataSupplier.phone}</span>
+                  </p>
+                )}
+                {formDataSupplier.bik && (
+                  <p>
+                    БИК: <span className="underline">{formDataSupplier.bik}</span>
+                  </p>
+                )}
+
+
+                {formDataSupplier.corr_account && (
+                  <p>
+                    К/С: <span className="underline">{formDataSupplier.corr_account}</span>
+                  </p>
+                )}
+
+                {(formDataSupplier.inn || formDataSupplier.kpp) && (
+                  <p>
+                    ИНН/КПП: <span className="underline">
+                      {formDataSupplier.inn || ''} {formDataSupplier.kpp && ` / ${formDataSupplier.kpp}`}
+                    </span>
+                  </p>
+                )}
+
+                {formDataSupplier.bank_name && (
+                  <p>
+                    Наименование банка: <span className="underline">{formDataSupplier.bank_name}</span>
+                  </p>
+                )}
+
+                {formDataSupplier.settlement_account && (
+                  <p>
+                    Р/С: <span className="underline">{formDataSupplier.settlement_account}</span>
+                  </p>
+                )}
+                {formDataSupplier.okved && (
+                  <p>
+                    ОКВЭД:: <span className="underline">{formDataSupplier.okved}</span>
+                  </p>
+                )}
+
+                {user.role === 'seller' ? (
+                  <p>
+                    Подпись/расшифровка
+                    <canvas
+                      ref={canvasRef}
+                      width={500}
+                      height={200}
+                      style={{ border: '1px solid #ccc', cursor: 'crosshair' }}
+                      onMouseDown={startDrawing}
+                      onMouseMove={draw}
+                      onMouseUp={stopDrawing}
+                      onMouseLeave={stopDrawing}
+                    ></canvas>
+                    <div className="mt-4 space-x-4">
+                      <button
+                        onClick={clearCanvas}
+                        className="px-4 py-2 bg-red-500 text-white rounded"
+                      >
+                        Очистить
+                      </button>
+                      <button
+                        onClick={saveSignature}
+                        className="px-4 py-2 bg-blue-500 text-white rounded"
+                      >
+                        Сохранить подпись
+                      </button>
+                    </div>
+                  </p>
+                ) : (
+                  <p>
+                    Подпись/расшифровка (продавец заполнит после проверки контракта)
+                  </p>
+                )}
+
+
+              </div>
+
+              <div key='buyer' className='flex flex-col gap-2 w-1/2 text-right items-end'>
+              {formDataUser.name && (
+                  <p>
+                   ФИО: <span className="underline">{formDataUser.name}</span>
+                  </p>
+                )}
+
+                {formDataUser.inn && (
+                  <p>
+                   ИНН: <span className="underline">{formDataUser.inn}</span>
+                  </p>
+                )}
+              {formDataUser.phone && (
+                  <p>
+                   Телефон: <span className="underline">{formDataUser.phone}</span>
+                  </p>
+                )}
+
+
+
+
+
+                  {user.role === 'buyer' ? (
+                      <p>
+                        Подпись/расшифровка
+                        <canvas
+                          ref={canvasRef}
+                          width={500}
+                          height={200}
+                          style={{ border: '1px solid #ccc', cursor: 'crosshair' }}
+                          onMouseDown={startDrawing}
+                          onMouseMove={draw}
+                          onMouseUp={stopDrawing}
+                          onMouseLeave={stopDrawing}
+                        ></canvas>
+                        <div className="mt-4 space-x-4">
+                          <button
+                            onClick={clearCanvas}
+                            className="px-4 py-2 bg-red-500 text-white rounded"
+                          >
+                            Очистить
+                          </button>
+                          <button
+                            onClick={saveSignature}
+                            className="px-4 py-2 bg-blue-500 text-white rounded"
+                          >
+                            Сохранить подпись
+                          </button>
+                        </div>
+                      </p>
+                    ) : (
+                      <p>
+                        Подпись/расшифровка (ожидание заполнения пользователем)
+                      </p>
+                    )}
+              </div>
+            </div>
+
+
+
+        </div>
 
     </div>
 );

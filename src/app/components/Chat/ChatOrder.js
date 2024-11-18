@@ -7,7 +7,11 @@ import { useUser } from '../Auth/UserProvider';
 import { useSearchParams } from 'next/navigation';
 import Loader from '../Loaders/Loader';
 import Link from 'next/link';
-import { TbHandClick } from "react-icons/tb";
+import { TbHandClick, TbSend  } from "react-icons/tb";
+import { GiPaperClip } from "react-icons/gi";
+import SendIcon from '/public/send.svg';
+import Image from 'next/image';
+import { RxCross1 } from 'react-icons/rx';
 
 const ChatOrder = () => {
   const searchParams = useSearchParams();
@@ -179,7 +183,15 @@ const ChatOrder = () => {
         return null;
     }
   };
-
+  const handleDeleteFile = () => {
+    if (!selectedFile) return;
+  
+    // Сбрасываем состояние выбранного файла
+    setSelectedFile(null);
+  
+    console.log('Файл удалён из состояния.');
+  };
+  
   return (
     <div className="my-6 flex gap-4 flex-col lg:flex-row container mx-auto">
       <div className="p-6 bg-gray-100 rounded-lg shadow-md w-8/12">
@@ -200,12 +212,17 @@ const ChatOrder = () => {
             placeholder="Введите сообщение"
             className="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <label className="ml-2 p-2 cursor-pointer text-gray-500 hover:text-blue-600 transition duration-200">
+          <label className="ml-2 p-2 cursor-pointer text-gray-500 transition duration-200">
             <input type="file" className="hidden" onChange={handleFileChange} />
-            📎
+            <GiPaperClip size={40} className='border p-1 border-gray-300 hover:bg-blue-500 transition duration-200  rounded-full' />
           </label>
-          <button onClick={handleSendMessage} className="ml-2 p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">
-            Отправить
+          <button onClick={handleSendMessage} className="ml-2 p-1 border  border-gray-300 rounded-full cursor-pointer text-gray-500 hover:bg-blue-500 transition duration-200">
+              <Image
+                src={SendIcon}
+                width={30}
+                height={30}
+                className=' p-1   transition duration-200 '
+              />
           </button>
         </div>
         {selectedFile && (
@@ -217,6 +234,12 @@ const ChatOrder = () => {
             >
               Загрузить
             </button>
+            <button
+              onClick={handleDeleteFile}
+              className='ml-2'
+              >
+                <RxCross1 color='red'/>
+              </button>
           </div>
         )}
       </div>

@@ -53,7 +53,7 @@ const CartList = () => {
     <div className="container mx-auto p-4">
       <ul className="space-y-4">
         {cart.map((item, index) => (
-          <li key={index} className="p-4 bg-white rounded-lg shadow-md flex items-center">
+          <li key={index} className="p-4 bg-white rounded-lg shadow-md flex gap-2 items-center">
      
 
 
@@ -67,7 +67,7 @@ const CartList = () => {
                 <Image
                   src={NotFound}
                   alt="No image"
-                  className="flex flex-col"
+                  className="flex flex-col w-48 "
                 />
               )}
 
