@@ -17,6 +17,7 @@ const CheckoutMain = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    buyer_fullname: '',
     phone: '',
     inn: '',
     city: '',
@@ -28,7 +29,7 @@ const CheckoutMain = () => {
 
   const [suppliers, setSuppliers] = useState([]);
   const [selectedSupplier, setSelectedSupplier] = useState('');
-
+  const BuyerApiUrl = `https://test.kimix.space/api/user-address`; // Обновить URL
   useEffect(() => {
     if (cart.length > 0) {
       const uniqueSuppliers = [...new Set(cart.map(item => item.supplier))];
@@ -38,15 +39,44 @@ const CheckoutMain = () => {
     }
 
 
-    if (user) {
-      setFormData((prevData) => ({
-        ...prevData,
-        name: user.name || '',
-        email: user.email || '',
-      }));
-    }
+      if (user) {
+        setFormData((prevData) => ({
+          ...prevData,
+          name: user.name || '',
+          email: user.email || '',
+        }));
+     
+      // Получение адреса пользователя
+      const fetchUserAddress = async () => {
+        try {
+          const response = await axios.get(`${BuyerApiUrl}/${user.id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+            withXSRFToken:true,
+          });
+          const address = response.data;
 
-  }, [cart, user]);
+          setFormData((prevData) => ({
+            ...prevData,
+            buyer_fullname: address.buyer_fullname || '',
+            inn: address.inn || '',
+            phone: address.phone || '',
+            city: address.city || '',
+            street: address.street || '',
+            house: address.house || '',
+            building: address.building || '',
+            office: address.office || '',
+          }));
+        } catch (error) {
+          console.error('Error fetching user address:', error);
+        }
+      };
+
+      fetchUserAddress();
+    }
+  }, [cart, user, token]);
 
   if (!isClient) {
     return <Loader />;
@@ -189,6 +219,20 @@ const CheckoutMain = () => {
                 className="border rounded px-2 py-1 w-full"
             />
             </div>
+
+            <div>
+            <label htmlFor="buyer_fullname" className="block">Полное наименование организации</label>
+            <input
+                type="text"
+                id="buyer_fullname"
+                name="buyer_fullname"
+                value={formData.buyer_fullname}
+                onChange={handleChange}
+                className="border rounded px-2 py-1 w-full"
+            />
+            </div>
+
+
             <div>
             <label htmlFor="city" className="block">Город доставки <span className="text-red-500">*</span></label>
             <input

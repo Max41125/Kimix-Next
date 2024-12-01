@@ -142,7 +142,7 @@ const LoginForm = () => {
 
             if (data.verify) {
               console.log('Success:', data);
-              login({ email: data.email, role: data.role, name: data.name, id:data.id }, data.token);
+              login({ email: data.email, role: data.role, name: data.name, id:data.id }, data.token, remember);
               router.push('/dashboard'); // Перенаправляем на дашборд
             } else {
               setVerificationMessage("Пожалуйста, подтвердите вашу почту.");

@@ -8,13 +8,16 @@ import AddProductSeller from '@/app/components/Personal/Role/AddProductSeller';
 import GeneralContent from '@/app/components/Personal/Role/GeneralContent';
 import OrdersSeller from '@/app/components/Personal/Role/OrdersSeller';
 import Loader from '../Loaders/Loader';
+import { useRouter } from 'next/navigation';
 
 const Dashboard = () => {
   const { user, token } = useUser();
   const [activeSection, setActiveSection] = useState('general'); // Состояние для текущей секции
+  const router = useRouter();
 
   if (!user) {
-    return <Loader />; // Выводим что-то, пока пользователь загружается
+    router.push('/auth');
+    return <Loader />; 
   }
 
   // Функция для рендеринга контента в зависимости от выбранной секции

@@ -13,25 +13,63 @@ import SendIcon from '/public/send.svg';
 import Image from 'next/image';
 import { RxCross1 } from 'react-icons/rx';
 import OrderProgressLine from '@/app/components/Personal/OrderProgressLine';
+import { useRouter } from 'next/navigation';
+import ContractVerification from '@/app/components/Chat/ContractVerification';
+import ContractPayment from '@/app/components/Chat/ContractPayment';
+import ContractShipping from '@/app/components/Chat//ContractShipping';
 
 
 const ChatOrder = () => {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
   const [messages, setMessages] = useState([]);
+  const [order, setOrder] = useState([]);
   const [message, setMessage] = useState('');
   const [documents, setDocuments] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [contractStatus, setContractStatus] = useState('not_filled'); // Статус контракта: not_filled, filled, under_review, canceled
+  const [contractStatus, setContractStatus] = useState('not_filled');
   const [isContractOpen, setIsContractOpen] = useState(false);
+  const [hasPermission, setHasPermission] = useState(true); 
+  const [loading, setLoading] = useState(true); 
   const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
   const { user, token } = useUser() || { user: null, token: null };
+  const router = useRouter();
 
   useEffect(() => {
     if (!user || !token || !orderId) return;
 
+    const fetchOrder = async () => {
+      try {
+        await axios.get(csrfUrl, { withCredentials: true });
+        const response = await axios.get(`https://test.kimix.space/api/user/order/${orderId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+          withCredentials: true,
+          withXSRFToken:true,
+
+        });
+
+        const dataOrder = response.data;
+        setOrder(dataOrder);
+        if (dataOrder.user_id !== user.id && dataOrder.products?.[0].pivot?.supplier_id !== user.id) {
+          setHasPermission(false); // Если нет прав доступа
+          setLoading(false); // Завершаем загрузку
+          return;
+        }else{
+
+          setLoading(false);
+        }
+        
+      } catch (err) {
+        console.error('Ошибка при получении заказа:', err);
+      }
+    };
+
+
+    
     const fetchMessages = async () => {
-      await axios.get(csrfUrl, { withCredentials: true });
+      
       try {
         const response = await axios.get(`https://test.kimix.space/api/auth/chat/messages/${orderId}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -69,7 +107,7 @@ const ChatOrder = () => {
         console.error('Ошибка при получении статуса контракта:', error);
       }
     };
-
+    fetchOrder();  
     fetchMessages();
     fetchDocuments();
     fetchContractStatus();
@@ -140,9 +178,22 @@ const ChatOrder = () => {
     setIsContractOpen((prev) => !prev);
   };
 
+
+
   if (!user) {
     return <Loader />;
   }
+
+  if (loading) {
+    return <Loader />; // Пока идет перенаправление, показываем лоадер
+  }
+
+  if (!loading && !hasPermission) {
+    router.push('/dashboard');
+    return <Loader />; 
+  }
+
+
 
 
   const handleDeleteFile = () => {
@@ -232,8 +283,9 @@ const ChatOrder = () => {
         )}
 
     
-
-        <div className="mt-4 bg-white rounded-lg bg-white rounded-xl">
+        {contractStatus == 'new' && (
+          
+          <div className="mt-4 bg-white rounded-lg bg-white rounded-xl">
           <div
             className={`flex items-center p-2 cursor-pointer rounded-lg bg-white rounded-xl group`}
             onClick={toggleContract}
@@ -261,6 +313,22 @@ const ChatOrder = () => {
             </div>
           )}
         </div>
+        
+        )}
+        {contractStatus !== 'new' && (
+          <ContractVerification userRole={user.role} userId={user.id} userToken={token} orderId={orderId} contractStatus={contractStatus} />
+        )}
+
+        {contractStatus === 'waiting_payment' && (
+          
+          <ContractPayment userRole={user.role} supplierId={order.products?.[0].pivot?.supplier_id} userToken={token} orderId={orderId} />
+
+        )}
+       
+       {(contractStatus === 'packing' || contractStatus === 'shipping' || contractStatus === 'shipped') &&
+          user.role === 'seller' && (
+            <ContractShipping userToken={token} orderId={orderId} currentStatus={contractStatus} />
+        )}
       </div>
     </div>
   );

@@ -158,7 +158,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
 
             if (data.verify) {
                 console.log('Success:', data);
-                login({ email: data.email, role: data.role, name: data.name, id: data.id }, data.token);
+                login({ email: data.email, role: data.role, name: data.name, id: data.id }, data.token, remember);
                 toggleModal();
                 router.push('/dashboard');
             } else {

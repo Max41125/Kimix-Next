@@ -13,6 +13,9 @@ const RussianContract = ({ orderId, currentDate }) => {
     const [supplier, setSupplier] = useState(null);
     const { user, token } = useUser() || { user: null, token: null };
     const [products , setProducts] = useState(null);
+    const [acceptanceChecked, setAcceptanceChecked] = useState(false);
+    const [contractStatus, setContractStatus] = useState('not_filled');
+
     const [formDataSupplier, setFormDataSupplier] = useState({
         type: '',
         full_name: '',
@@ -48,58 +51,9 @@ const RussianContract = ({ orderId, currentDate }) => {
         phone: '',
         inn: '',
       });
-      const canvasRef = useRef(null);
-      const [isDrawing, setIsDrawing] = useState(false);
+
     
-      // Начало рисования
-      const startDrawing = (e) => {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        ctx.beginPath();
-        ctx.moveTo(
-          e.nativeEvent.offsetX,
-          e.nativeEvent.offsetY
-        );
-        setIsDrawing(true);
-      };
-    
-      // Рисование
-      const draw = (e) => {
-        if (!isDrawing) return;
-    
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        ctx.lineTo(
-          e.nativeEvent.offsetX,
-          e.nativeEvent.offsetY
-        );
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      };
-    
-      // Конец рисования
-      const stopDrawing = () => {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        ctx.closePath();
-        setIsDrawing(false);
-      };
-    
-      // Очистка canvas
-      const clearCanvas = () => {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      };
-    
-      // Сохранение подписи как изображения
-      const saveSignature = () => {
-        const canvas = canvasRef.current;
-        const dataURL = canvas.toDataURL('image/png');
-        console.log("Saved Signature URL: ", dataURL);
-        // Отправьте `dataURL` на сервер или используйте его дальше
-      };
+
 
 
 
@@ -172,6 +126,7 @@ const RussianContract = ({ orderId, currentDate }) => {
                 email: dataOrder.user.email,
                 phone: userAddress.phone,
                 inn: userAddress.inn,
+                buyer_fullname: userAddress.buyer_fullname,
               }));
             }
       
@@ -181,8 +136,21 @@ const RussianContract = ({ orderId, currentDate }) => {
             setLoading(false);
           }
         };
-      
+        const fetchContractStatus = async () => {
+          try {
+            const response = await axios.get(`https://test.kimix.space/api/orders/${orderId}/status`, {
+              headers: { Authorization: `Bearer ${token}` },
+              withCredentials: true,
+              withXSRFToken:true,
+            });
+            setContractStatus(response.data.status);
+          } catch (error) {
+            console.error('Ошибка при получении статуса контракта:', error);
+          }
+        };
+
         fetchOrder();
+        fetchContractStatus();
       }, [orderId, token]);
   
     if (loading) return <Loader/>;
@@ -207,32 +175,92 @@ const RussianContract = ({ orderId, currentDate }) => {
       }
     };
 
+    const handleSubmitContract = async () => {
+      try {
+        // Проверка на согласие с условиями контракта
+        if (!acceptanceChecked) {
+          alert('Вы должны подтвердить, что ознакомлены с условиями контракта.');
+          return;
+        }
+    
+        // Запрос на CSRF
+        await axios.get(csrfUrl, { withCredentials: true });
+    
+        // Подготовка данных для отправки контракта
+        const contractData = {
+          order_id: orderId,
+          user_id: user.id,
+          language: 'ru', // или 'en', в зависимости от выбранного языка
+        };
+    
+        // Отправка контракта только для роли 'buyer'
+        if (user.role === 'buyer') {
+          const contractResponse = await axios.post(
+            'https://test.kimix.space/api/contract-orders',
+            contractData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`, // Токен пользователя
+                'Content-Type': 'application/json',
+              },
+              withCredentials: true,
+              withXSRFToken: true,
+            }
+          );
+    
+          // Проверка успешности отправки контракта
+          if (contractResponse.status !== 200) {
+            alert('Ошибка при отправке контракта');
+            return;
+          }
+        }
+    
+        // Изменение статуса заказа в зависимости от роли пользователя
+        const statusData = {
+          status: user.role === 'buyer' ? 'contract_verification' : 'waiting_payment',
+        };
+    
+        const statusChangeResponse = await axios.patch(
+          `https://test.kimix.space/api/orders/${orderId}/status`,
+          statusData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true,
+            withXSRFToken: true,
+          }
+        );
+    
+        // Проверка ответа на изменение статуса
+        if (statusChangeResponse.status === 200) {
+          if (user.role === 'buyer') {
+
+            alert('Контракт отправлен на проверку');
+          }else{
+
+            alert('Контракт подтвержден статус изменен на "Ожидание оплаты" ');
+          }
+          
+        } else {
+          alert('Ошибка при изменении статуса заказа');
+        }
+      } catch (error) {
+        console.error('Ошибка при отправке контракта:', error);
+        alert('Ошибка при отправке контракта');
+      }
+    };
+    
+    
+    
 
 
   return (
     <div>
         <h1 className='font-bold text-2xl mb-8'>
       
-           КОНТРАКТ  No. 
-            <input 
-                type="text" 
-                id="contractNumberEN" 
-                readOnly 
-                value={orderId} 
-                placeholder="________" 
-                maxLength="20" 
-                className='ml-2 focus:border-0 outline-none hover:border-0 active:border-0 max-w-[20px] '
-            /> 
-            от   
-            <input 
-                type="text" 
-                id="contractDateEN" 
-                readOnly 
-                className='ml-2 focus:border-0 outline-none hover:border-0 active:border-0 max-w-[150px]'
-                value={currentDate} 
-                placeholder="______ г." 
-                maxLength="10" 
-            />
+           КОНТРАКТ  No. {orderId} от {currentDate}
         </h1>
 
         <p>Настоящий Контракт составлен между</p>
@@ -248,7 +276,21 @@ const RussianContract = ({ orderId, currentDate }) => {
         , действующего на основании документов компании, именуемой в дальнейшем «Поставщик»
         </p>
 
-        <p>и <b>{formDataUser.name}</b>,</p>
+        <p>и  
+        {formDataUser.inn ? (
+
+           <b> {formDataUser.buyer_fullname}</b>
+
+        ):(
+
+            <b>{formDataUser.name}</b>
+
+        )}
+         
+          
+          
+          
+          ,</p>
 
         <p>
         находящемуся по адресу: 
@@ -261,10 +303,22 @@ const RussianContract = ({ orderId, currentDate }) => {
         </b>
         .
         </p>
-        <p>
-        в лице Генерального директора <input type="text" id="buyerRepresentativeEN" placeholder="____________________" /> 
-        , действующего на основании Устава, именуемый в дальнейшем «Покупатель».
-        </p>
+        {formDataUser.inn ? (
+          <p>
+            
+          в лице Генерального директора <b>{formDataUser.name} </b>
+          , действующего на основании Устава, именуемый в дальнейшем «Покупатель».
+          </p>
+        ) : (
+          <p>
+             в лице <b>{formDataUser.name} </b>
+             , действующего на основании Устава, именуемый в дальнейшем «Покупатель».
+
+          </p>
+
+
+        )}
+        
 
         <h2>1. ПРОДАЖА И ПОКУПКА</h2>
         
@@ -510,7 +564,7 @@ const RussianContract = ({ orderId, currentDate }) => {
         
 
         <div className='my-6'>
-            <h2 className='font-bold text-2xl text-center'>ПОДПИСИ СТОРОН:</h2>
+            <h2 className='font-bold text-2xl text-center'>ИНФОРМАЦИЯ СТОРОН:</h2>
 
             <div className='flex flex-row justify-between my-6'>
 
@@ -528,18 +582,10 @@ const RussianContract = ({ orderId, currentDate }) => {
                     Телефон: <span className="underline">{formDataSupplier.phone}</span>
                   </p>
                 )}
-                {formDataSupplier.bik && (
-                  <p>
-                    БИК: <span className="underline">{formDataSupplier.bik}</span>
-                  </p>
-                )}
 
 
-                {formDataSupplier.corr_account && (
-                  <p>
-                    К/С: <span className="underline">{formDataSupplier.corr_account}</span>
-                  </p>
-                )}
+
+
 
                 {(formDataSupplier.inn || formDataSupplier.kpp) && (
                   <p>
@@ -554,7 +600,16 @@ const RussianContract = ({ orderId, currentDate }) => {
                     Наименование банка: <span className="underline">{formDataSupplier.bank_name}</span>
                   </p>
                 )}
-
+                {formDataSupplier.bik && (
+                  <p>
+                    БИК: <span className="underline">{formDataSupplier.bik}</span>
+                  </p>
+                )}
+                {formDataSupplier.corr_account && (
+                  <p>
+                    К/С: <span className="underline">{formDataSupplier.corr_account}</span>
+                  </p>
+                )}
                 {formDataSupplier.settlement_account && (
                   <p>
                     Р/С: <span className="underline">{formDataSupplier.settlement_account}</span>
@@ -566,101 +621,106 @@ const RussianContract = ({ orderId, currentDate }) => {
                   </p>
                 )}
 
-                {user.role === 'seller' ? (
-                  <p>
-                    Подпись/расшифровка
-                    <canvas
-                      ref={canvasRef}
-                      width={500}
-                      height={200}
-                      style={{ border: '1px solid #ccc', cursor: 'crosshair' }}
-                      onMouseDown={startDrawing}
-                      onMouseMove={draw}
-                      onMouseUp={stopDrawing}
-                      onMouseLeave={stopDrawing}
-                    ></canvas>
-                    <div className="mt-4 space-x-4">
-                      <button
-                        onClick={clearCanvas}
-                        className="px-4 py-2 bg-red-500 text-white rounded"
-                      >
-                        Очистить
-                      </button>
-                      <button
-                        onClick={saveSignature}
-                        className="px-4 py-2 bg-blue-500 text-white rounded"
-                      >
-                        Сохранить подпись
-                      </button>
-                    </div>
-                  </p>
-                ) : (
-                  <p>
-                    Подпись/расшифровка (продавец заполнит после проверки контракта)
-                  </p>
-                )}
 
 
               </div>
 
               <div key='buyer' className='flex flex-col gap-2 w-1/2 text-right items-end'>
+                <p className='font-bold text-xl'>Покупатель</p>
+
+             
               {formDataUser.name && (
                   <p>
                    ФИО: <span className="underline">{formDataUser.name}</span>
                   </p>
                 )}
 
-                {formDataUser.inn && (
+              {formDataUser.email && (
                   <p>
-                   ИНН: <span className="underline">{formDataUser.inn}</span>
+                   Email: <span className="underline">{formDataUser.email}</span>
                   </p>
                 )}
+
+
               {formDataUser.phone && (
                   <p>
                    Телефон: <span className="underline">{formDataUser.phone}</span>
                   </p>
                 )}
+                {formDataUser.inn && (
+                  <p>
+                   ИНН: <span className="underline">{formDataUser.inn}</span>
+                  </p>
+                )}
+              {formDataUser.buyer_fullname && (
+                  <p>
+                   <span className="underline">{formDataUser.buyer_fullname}</span>
+                  </p>
+                )}
 
-
-
-
-
-                  {user.role === 'buyer' ? (
-                      <p>
-                        Подпись/расшифровка
-                        <canvas
-                          ref={canvasRef}
-                          width={500}
-                          height={200}
-                          style={{ border: '1px solid #ccc', cursor: 'crosshair' }}
-                          onMouseDown={startDrawing}
-                          onMouseMove={draw}
-                          onMouseUp={stopDrawing}
-                          onMouseLeave={stopDrawing}
-                        ></canvas>
-                        <div className="mt-4 space-x-4">
-                          <button
-                            onClick={clearCanvas}
-                            className="px-4 py-2 bg-red-500 text-white rounded"
-                          >
-                            Очистить
-                          </button>
-                          <button
-                            onClick={saveSignature}
-                            className="px-4 py-2 bg-blue-500 text-white rounded"
-                          >
-                            Сохранить подпись
-                          </button>
-                        </div>
-                      </p>
-                    ) : (
-                      <p>
-                        Подпись/расшифровка (ожидание заполнения пользователем)
-                      </p>
-                    )}
+                {formDataUser.phone && (
+                  <p>
+                  Адрес:<span className="underline"> {formDataUser.city && `г. ${formDataUser.city} `}
+                  {formDataUser.street && `ул. ${formDataUser.street} `}
+                  {formDataUser.house && `д. ${formDataUser.house} `}
+                  {formDataUser.building && `стр. ${formDataUser.building} `}
+                  {formDataUser.office && `оф. ${formDataUser.office}`}</span>
+                  </p>
+                )}
               </div>
+
+
+   
             </div>
 
+            {user.role === 'buyer' && contractStatus === 'new' && (
+              <div className="mt-6 flex flex-col gap-4 border border-gray-300  p-4 rounded-lg">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="acceptance"
+                    onChange={(e) => setAcceptanceChecked(e.target.checked)}
+                  />
+                  Покупатель ознакомлен с условиями контракта
+                </label>
+                <button
+                  className={`px-4 py-2 font-bold rounded ${
+                    acceptanceChecked
+                      ? 'bg-green-500 text-white cursor-pointer'
+                      : 'bg-gray-300 text-gray-700 cursor-not-allowed'
+                  }`}
+                  onClick={handleSubmitContract}
+                  disabled={!acceptanceChecked}
+                >
+                  Отправить контракт на проверку
+                </button>
+              </div>
+            )}
+
+            {user.role === 'seller' && contractStatus === 'contract_verification' && (
+
+              <div className="mt-6 flex flex-col gap-4 border border-gray-300  p-4 rounded-lg">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="acceptance"
+                    onChange={(e) => setAcceptanceChecked(e.target.checked)}
+                  />
+                  Продавец ознакомлен с условиями контракта
+                </label>
+                <button
+                  className={`px-4 py-2 font-bold rounded ${
+                    acceptanceChecked
+                      ? 'bg-green-500 text-white cursor-pointer'
+                      : 'bg-gray-300 text-gray-700 cursor-not-allowed'
+                  }`}
+                  onClick={handleSubmitContract}
+                  disabled={!acceptanceChecked}
+                >
+                  Подтвердить контракт
+                </button>
+              </div>
+            )}
 
 
         </div>
