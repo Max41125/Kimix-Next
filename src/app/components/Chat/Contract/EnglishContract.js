@@ -1,57 +1,304 @@
-import React from 'react';
-
+import React, {useState, useEffect} from 'react';
+import axios from 'axios';
+import Loader from '@/app/components/Loaders/Loader';
+import { useUser } from '@/app/components/Auth/UserProvider';
 
 
 const EnglishContract = ({ orderId, currentDate }) => {
 
+    const [order, setOrder] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [supplier, setSupplier] = useState(null);
+    const { user, token } = useUser() || { user: null, token: null };
+    const [products , setProducts] = useState(null);
+    const [acceptanceChecked, setAcceptanceChecked] = useState(false);
+    const [contractStatus, setContractStatus] = useState('not_filled');
 
+    const [formDataSupplier, setFormDataSupplier] = useState({
+        type: '',
+        full_name: '',
+        short_name: '',
+        legal_address: '',
+        actual_address: '',
+        email: '',
+        phone: '',
+        inn: '',
+        ogrn: '',
+        bank_name: '',
+        bik: '',
+        corr_account: '',
+        settlement_account: '',
+        okved: '',
+        tax_system: '',
+        kpp: '',
+        ogrn: '',
+        director: '',
+        chief_accountant: '',
+        authorized_person: '',
+      });
+
+
+      const [formDataUser, setFormDataUser] = useState({
+        name: '',
+        city: '',
+        street: '',
+        house: '',
+        building: '',
+        office: '',
+        email: '',
+        phone: '',
+        inn: '',
+      });
+
+    
+
+
+
+
+
+
+    const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+  
+    useEffect(() => {
+        if (!user || !token || !orderId) return;
+      
+        const fetchOrder = async () => {
+          try {
+            // Fetch CSRF token
+            await axios.get(csrfUrl, { withCredentials: true });
+      
+            // Fetch order details
+            const responseOrder = await axios.get(
+              `https://test.kimix.space/api/user/order/${orderId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+                withCredentials: true,
+                withXSRFToken: true,
+              }
+            );
+            const dataOrder = responseOrder.data;
+            setOrder(dataOrder);
+            setProducts(dataOrder.products);
+            // Extract supplier ID from the first product (if applicable)
+            const firstProduct = dataOrder?.products?.[0];  // Проверяем, есть ли продукт
+            const supplierId = firstProduct?.pivot?.supplier_id;
+            
+
+            if (supplierId) {
+              // Fetch supplier details
+              const responseSupplier = await axios.get(
+                `https://test.kimix.space/api/seller/${supplierId}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                  withCredentials: true,
+                  withXSRFToken: true,
+                }
+              );
+      
+              const supplierData = responseSupplier.data;
+              setSupplier(supplierData);
+      
+              if (supplierData) {
+                setFormDataSupplier((prevData) => ({
+                  ...prevData,
+                  ...supplierData,
+                }));
+              }
+            }
+      
+           
+            if (dataOrder?.user?.user_addresses?.length > 0) {
+              const userAddress = dataOrder.user.user_addresses[0]; 
+              setFormDataUser((prevData) => ({
+                ...prevData,
+                name: dataOrder.user.name,
+                city: userAddress.city,
+                street: userAddress.street,
+                house: userAddress.house,
+                building: userAddress.building,
+                office: userAddress.office,
+                email: dataOrder.user.email,
+                phone: userAddress.phone,
+                inn: userAddress.inn,
+                buyer_fullname: userAddress.buyer_fullname,
+              }));
+            }
+      
+            setLoading(false);
+          } catch (err) {
+            setError(err.response?.data?.message || 'Failed to fetch orders.');
+            setLoading(false);
+          }
+        };
+        const fetchContractStatus = async () => {
+          try {
+            const response = await axios.get(`https://test.kimix.space/api/orders/${orderId}/status`, {
+              headers: { Authorization: `Bearer ${token}` },
+              withCredentials: true,
+              withXSRFToken:true,
+            });
+            setContractStatus(response.data.status);
+          } catch (error) {
+            console.error('Ошибка при получении статуса контракта:', error);
+          }
+        };
+
+        fetchOrder();
+        fetchContractStatus();
+      }, [orderId, token]);
+  
+    if (loading) return <Loader/>;
+    if (error) return <div>Error: {error}</div>;
+    const getCurrencySymbol = (currency) => {
+      switch (currency) {
+        case 'RUB': return '₽';
+        case 'USD': return '$';
+        case 'EUR': return '€';
+        case 'CNY': return '¥';
+        default: return currency;
+      }
+    };
+  
+    const translateUnitType = (unitType) => {
+      switch (unitType) {
+        case 'grams': return 'gr.';
+        case 'kilograms': return 'kg.';
+        case 'tons': return 't.';
+        case 'pieces': return 'thing';
+        default: return unitType;
+      }
+    };
+
+    const handleSubmitContract = async () => {
+      try {
+        // Проверка на согласие с условиями контракта
+        if (!acceptanceChecked) {
+          alert('You must confirm that you have read the terms of the contract.');
+          return;
+        }
+    
+        // Запрос на CSRF
+        await axios.get(csrfUrl, { withCredentials: true });
+    
+        // Подготовка данных для отправки контракта
+        const contractData = {
+          order_id: orderId,
+          user_id: user.id,
+          language: 'en', // или 'en', в зависимости от выбранного языка
+        };
+    
+        // Отправка контракта только для роли 'buyer'
+        if (user.role === 'buyer') {
+          const contractResponse = await axios.post(
+            'https://test.kimix.space/api/contract-orders',
+            contractData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`, // Токен пользователя
+                'Content-Type': 'application/json',
+              },
+              withCredentials: true,
+              withXSRFToken: true,
+            }
+          );
+    
+          // Проверка успешности отправки контракта
+          if (contractResponse.status !== 200) {
+            alert('Error sending contract');
+            return;
+          }
+        }
+    
+        // Изменение статуса заказа в зависимости от роли пользователя
+        const statusData = {
+          status: user.role === 'buyer' ? 'contract_verification' : 'waiting_payment',
+        };
+    
+        const statusChangeResponse = await axios.patch(
+          `https://test.kimix.space/api/orders/${orderId}/status`,
+          statusData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true,
+            withXSRFToken: true,
+          }
+        );
+    
+        // Проверка ответа на изменение статуса
+        if (statusChangeResponse.status === 200) {
+          if (user.role === 'buyer') {
+
+            alert('The contract has been sent for review.');
+          }else{
+
+            alert('Contract confirmed status changed to "Waiting for payment"');
+          }
+          
+        } else {
+          alert('Error changing order status');
+        }
+      } catch (error) {
+        console.error('Error sending contract:', error);
+        alert('Error sending contract');
+      }
+    };
 
     return (
-        <>
+ 
         <div>
             <h1 className='font-bold text-2xl mb-8'>
           
-                CONTRACT No. 
-                <input 
-                    type="text" 
-                    id="contractNumberEN" 
-                    readOnly 
-                    value={orderId} 
-                    placeholder="________" 
-                    maxLength="20" 
-                    className='ml-2 focus:border-0 outline-none hover:border-0 active:border-0 max-w-[20px] '
-                /> 
-                dated  
-                <input 
-                    type="text" 
-                    id="contractDateEN" 
-                    readOnly 
-                    className='ml-2 focus:border-0 outline-none hover:border-0 active:border-0 max-w-[150px]'
-                    value={currentDate} 
-                    placeholder="______ г." 
-                    maxLength="10" 
-                />
+                CONTRACT No. {orderId} dated {currentDate}
             </h1>
 
             <p>This Contract is concluded between</p>
             <p>
-                <input type="text" id="supplierEN" placeholder="__________________________" /> 
-                located at: 
-                <input type="text" id="supplierAddressEN" placeholder="______________________________________" />
+            
+            <b>{formDataSupplier.full_name}</b>  located at: <b>{formDataSupplier.legal_address}</b>
+           
             </p>
 
             <p>
-                represented by <input type="text" id="supplierRepresentativeEN" placeholder="____________________" /> 
+                represented by  
+                {formDataSupplier.short_name || ''}
                 acting under documents of the company, hereinafter referred to as “the Supplier”
             </p>
 
-            <p>and <input type="text" id="buyerEN" placeholder="__________________________" />,</p>
+            <p>and 
+                
+            {formDataUser.inn ? (
+
+                <b> {formDataUser.buyer_fullname}</b>
+
+                ):(
+
+                <b>{formDataUser.name}</b>
+
+            )}
+                ,</p>
 
             <p>
-                located at: <input type="text" id="buyerAddressEN" placeholder="______________________________________" />.
+                located at: 
+                
+                <b>
+                {formDataUser.city && `г. ${formDataUser.city} `}
+                {formDataUser.street && `ул. ${formDataUser.street} `}
+                {formDataUser.house && `д. ${formDataUser.house} `}
+                {formDataUser.building && `стр. ${formDataUser.building} `}
+                {formDataUser.office && `оф. ${formDataUser.office}`}
+                </b>
+                .
             </p>
             <p>
-                Represented by <input type="text" id="buyerRepresentativeEN" placeholder="____________________" />, 
+                Represented by <b>{formDataUser.name} </b>,
                 the General Director, under documents of
             </p>
         
@@ -241,8 +488,226 @@ const EnglishContract = ({ orderId, currentDate }) => {
                 <br/>
                 11.4. The present Contract is made up in English and Russian languages in two counterparts, one copy for each Party. Both English and Russian versions of the present Contract are equivalent and original. In case of any discrepancies found by the Parties in the Contract Russian version will prevail.
             </p>
+ 
+
+        <table className="mt-6 table-auto border-collapse border border-gray-300 w-full">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border border-gray-300 px-4 py-2">№</th>
+              <th className="border border-gray-300 px-4 py-2">Name</th>
+              <th className="border border-gray-300 px-4 py-2">Price per unit excluding VAT</th>
+              <th className="border border-gray-300 px-4 py-2">Quantity</th>
+              <th className="border border-gray-300 px-4 py-2">Unit of measurement</th>
+              <th className="border border-gray-300 px-4 py-2">Amount excluding VAT</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products && products.length > 0 ? (
+              products.map((product, index) => (
+           
+                <tr key={product.id} className="text-center">
+                  <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
+                  <td className="border border-gray-300 px-4 py-2">{product.title}</td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {product.pivot?.price} {getCurrencySymbol(product.pivot?.currency)}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">{product.pivot?.quantity}</td>
+                  <td className="border border-gray-300 px-4 py-2">{translateUnitType(product.pivot?.unit_type)}</td>
+                  <td className="border border-gray-300 px-4 py-2">
+                  {product.pivot?.quantity && product.pivot?.price 
+                  ? (product.pivot.quantity * product.pivot.price).toFixed(2)
+                  : '-'} {getCurrencySymbol(product.pivot?.currency)}
+
+                  </td>
+
+                </tr>
+
+               
+              ))
+
+            ) : (
+              <tr>
+                <td colSpan="6" className="border border-gray-300 px-4 py-2 text-center">
+                No products found
+                </td>
+              </tr>
+            )}
+              <tr className="text-center">
+                <td colSpan="5" className="border border-gray-300 px-4 py-2">
+                  <b>Total</b>
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {order.total_price} {getCurrencySymbol(order.currency)}
+                </td>
+
+              </tr>
+          </tbody>
+        </table>
+        
+
+        <div className='my-6'>
+            <h2 className='font-bold text-2xl text-center'>INFORMATION OF THE PARTIES:</h2>
+
+            <div className='flex flex-row justify-between my-6'>
+
+              <div key='seller' className='flex flex-col gap-2 border-gray-300 border-r-2 w-1/2'>
+
+                <p className='font-bold text-xl'>Supplier</p>
+
+                {formDataSupplier.short_name && (
+                  <p>
+                   {formDataSupplier.short_name}
+                  </p>
+                )}
+                {formDataSupplier.phone && (
+                  <p>
+                    Phone: <span className="underline">{formDataSupplier.phone}</span>
+                  </p>
+                )}
+
+
+
+
+
+                {(formDataSupplier.inn || formDataSupplier.kpp) && (
+                  <p>
+                    INN/KPP: <span className="underline">
+                      {formDataSupplier.inn || ''} {formDataSupplier.kpp && ` / ${formDataSupplier.kpp}`}
+                    </span>
+                  </p>
+                )}
+
+                {formDataSupplier.bank_name && (
+                  <p>
+                    Name of the bank: <span className="underline">{formDataSupplier.bank_name}</span>
+                  </p>
+                )}
+                {formDataSupplier.bik && (
+                  <p>
+                    BIC: <span className="underline">{formDataSupplier.bik}</span>
+                  </p>
+                )}
+                {formDataSupplier.corr_account && (
+                  <p>
+                    Сorr/A: <span className="underline">{formDataSupplier.corr_account}</span>
+                  </p>
+                )}
+                {formDataSupplier.settlement_account && (
+                  <p>
+                    Curr/A: <span className="underline">{formDataSupplier.settlement_account}</span>
+                  </p>
+                )}
+                {formDataSupplier.okved && (
+                  <p>
+                    OKVED:: <span className="underline">{formDataSupplier.okved}</span>
+                  </p>
+                )}
+
+
+
+              </div>
+
+              <div key='buyer' className='flex flex-col gap-2 w-1/2 text-right items-end'>
+                <p className='font-bold text-xl'>Buyer</p>
+
+             
+              {formDataUser.name && (
+                  <p>
+                   Full name: <span className="underline">{formDataUser.name}</span>
+                  </p>
+                )}
+
+              {formDataUser.email && (
+                  <p>
+                   Email: <span className="underline">{formDataUser.email}</span>
+                  </p>
+                )}
+
+
+              {formDataUser.phone && (
+                  <p>
+                   Phone: <span className="underline">{formDataUser.phone}</span>
+                  </p>
+                )}
+                {formDataUser.inn && (
+                  <p>
+                   INN: <span className="underline">{formDataUser.inn}</span>
+                  </p>
+                )}
+              {formDataUser.buyer_fullname && (
+                  <p>
+                   <span className="underline">{formDataUser.buyer_fullname}</span>
+                  </p>
+                )}
+
+                {formDataUser.phone && (
+                  <p>
+                  Address:<span className="underline"> {formDataUser.city && `г. ${formDataUser.city} `}
+                  {formDataUser.street && `ул. ${formDataUser.street} `}
+                  {formDataUser.house && `д. ${formDataUser.house} `}
+                  {formDataUser.building && `стр. ${formDataUser.building} `}
+                  {formDataUser.office && `оф. ${formDataUser.office}`}</span>
+                  </p>
+                )}
+              </div>
+
+
+   
+            </div>
+
+            {user.role === 'buyer' && contractStatus === 'new' && (
+              <div className="mt-6 flex flex-col gap-4 border border-gray-300  p-4 rounded-lg">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="acceptance"
+                    onChange={(e) => setAcceptanceChecked(e.target.checked)}
+                  />
+                  The buyer has read the terms of the contract
+                </label>
+                <button
+                  className={`px-4 py-2 font-bold rounded ${
+                    acceptanceChecked
+                      ? 'bg-green-500 text-white cursor-pointer'
+                      : 'bg-gray-300 text-gray-700 cursor-not-allowed'
+                  }`}
+                  onClick={handleSubmitContract}
+                  disabled={!acceptanceChecked}
+                >
+                  Submit contract for review
+                </button>
+              </div>
+            )}
+
+            {user.role === 'seller' && contractStatus === 'contract_verification' && (
+
+              <div className="mt-6 flex flex-col gap-4 border border-gray-300  p-4 rounded-lg">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="acceptance"
+                    onChange={(e) => setAcceptanceChecked(e.target.checked)}
+                  />
+                  The seller is familiar with the terms of the contract
+                </label>
+                <button
+                  className={`px-4 py-2 font-bold rounded ${
+                    acceptanceChecked
+                      ? 'bg-green-500 text-white cursor-pointer'
+                      : 'bg-gray-300 text-gray-700 cursor-not-allowed'
+                  }`}
+                  onClick={handleSubmitContract}
+                  disabled={!acceptanceChecked}
+                >
+                  Confirm contract
+                </button>
+              </div>
+            )}
+
+
         </div>
-        </>
+
+     </div>
     );
 };
 

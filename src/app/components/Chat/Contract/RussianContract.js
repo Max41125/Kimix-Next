@@ -270,7 +270,7 @@ const RussianContract = ({ orderId, currentDate }) => {
 
         <p>
         в лице <b>
-              {formDataSupplier.authorized_person || ''} 
+             
               {formDataSupplier.short_name || ''}
           </b>
         , действующего на основании документов компании, именуемой в дальнейшем «Поставщик»
