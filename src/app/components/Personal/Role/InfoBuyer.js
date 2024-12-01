@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
+import Loader from '../../Loaders/Circle';
 const InfoBuyer = ({ userId, userToken, userRole }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -24,6 +24,7 @@ const InfoBuyer = ({ userId, userToken, userRole }) => {
   useEffect(() => {
     const fetchUserAddress = async () => {
       if (!userId || !userToken) return;
+      if (userRole !== 'buyer') return;
 
       setLoading(true);
       setError(null);
@@ -92,7 +93,7 @@ const InfoBuyer = ({ userId, userToken, userRole }) => {
   };
 
   if (loading) {
-    return <div className="text-center">Загрузка...</div>;
+    return <Loader />;
   }
 
   return (
