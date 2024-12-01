@@ -8,12 +8,14 @@ import Loader from '@/app/components/Loaders/Circle';
 import axios from 'axios';
 import Image from 'next/image';
 import NotFound from '/public/notfound.svg';
+import { useRouter } from 'next/navigation';
 const CheckoutMain = () => {
   const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+  const router = useRouter();
   const { cart, clearCart } = useCart() || {};
   const { user, token } = useUser() || {};
   const [isClient, setIsClient] = useState(false);
-
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -117,6 +119,7 @@ const CheckoutMain = () => {
       
 
       console.log('Order submitted:', response.data);
+      router.push('/dashboard');
       clearCart();  // Очищаем корзину после успешного заказа
     } catch (error) {
       console.error('Error submitting order:', error);
