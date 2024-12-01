@@ -80,7 +80,7 @@ export const UserProvider = ({ children }) => {
                 userStore.logout();
                 localStorage.removeItem('token');  // Удаляем токен из localStorage
                 console.log('Logout successful');
-                router.push('/');
+                router.push('/auth');
             } else {
                 console.error('Logout error:', response.data);
             }
