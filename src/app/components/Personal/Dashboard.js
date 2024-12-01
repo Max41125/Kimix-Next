@@ -16,7 +16,7 @@ const Dashboard = () => {
   const router = useRouter();
 
   if (!user) {
-    router.push('/auth');
+    
     return <Loader />; 
   }
 

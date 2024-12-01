@@ -77,6 +77,7 @@ const InfoBuyer = ({ userId, userToken, userRole }) => {
         {
           headers: { Authorization: `Bearer ${userToken}` },
           withCredentials: true,
+          withXSRFToken:true,
         }
       );
 
