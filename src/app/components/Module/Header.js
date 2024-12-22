@@ -4,12 +4,13 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Logo from '/public/logo.svg';
+import UserImg from '/public/user.webp';
 import { CiSearch, CiLogin } from "react-icons/ci";
 import { FaRegCircleUser } from "react-icons/fa6"; 
 import AuthModal from "../Auth/AuthModal"; // Убедитесь, что путь правильный
 import { useUser } from '../Auth/UserProvider'; 
 import { BsCart2 } from "react-icons/bs";
-
+import { HiX } from 'react-icons/hi';
 
 const Header = () => {
   const { user, logout } = useUser() || {}; 
@@ -68,17 +69,44 @@ const Header = () => {
               </Link>
             )}
           {/* Иконка пользователя */}
-          <div className="relative">
+          <div className="relative flex flex-col items-center">
             <button onClick={user ? handleDropdownToggle : toggleModal} className="text-teal-500">
-              {user ? <CiLogin size={25} color="#14D8B5" /> : <FaRegCircleUser size={25} color="#14D8B5" />}
+              {user ? 
+              <div className="border border-[#14D8B5] w-[40px] h-[40px] overflow-hidden rounded-full bg-gray-300">
+                <Image src={UserImg} width={40} height={40} />
+              </div> 
+              : 
+              <FaRegCircleUser size={25} color="#14D8B5" />
+              }
             </button>
 
             {/* Выпадающее меню для авторизованного пользователя */}
             {user && isDropdownOpen && (
-              <div className="absolute z-20 right-0 bg-white shadow-md rounded mt-2 w-64">
-                <p className="px-4 py-2" >Доброго дня {user.name}</p>
-                <Link href="/dashboard" className="block px-4 py-2 transition hover:bg-gray-200">Личный кабинет</Link>
-                <button onClick={handleLogout} className="block w-full text-left px-4 py-2 transition hover:bg-gray-200">Выйти</button>
+              <div className="fixed inset-y-0 h-screen z-20 right-0 bg-white shadow-md rounded-lg flex flex-col items-center  w-64 px-2 py-12">
+
+              <button
+                  onClick={handleDropdownToggle}  // Закрываем окно при клике на крестик
+                  className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700"
+                >
+                  <HiX size={24} />
+                </button>
+                <Image src={UserImg} width={40} height={40} className="rounded-full" />
+                <p className="px-4 py-2 " >Доброго дня {user.name}</p>
+                <Link href="/dashboard?section=general" className="block px-4 py-2 rounded-lg transition text-center w-full hover:bg-green-200">Личный кабинет</Link>
+                {user?.role === "seller" &&(
+                <>
+                  <Link href="/dashboard?section=seller-orders" className="block px-4 py-2 rounded-lg transition text-center w-full hover:bg-green-200">Заказы покупателей</Link>
+                  <Link href="/dashboard?section=your-products" className="block px-4 py-2 rounded-lg transition text-center w-full hover:bg-yellow-200">Ваши товары</Link>
+                </>
+                )}
+                {user?.role === "buyer" &&(
+                  <>
+                    <Link href="/dashboard?section=сustomer-orders" className="block px-4 py-2 rounded-lg transition text-center w-full hover:bg-green-200">Ваши заказы</Link>
+                    <Link href="/chemicals" className="block px-4 py-2 rounded-lg transition text-center w-full hover:bg-blue-200">Поиск веществ</Link>
+                  </>
+                )}
+                
+                <button onClick={handleLogout} className="block w-full rounded-lg text-left  text-center px-4 py-2 transition hover:bg-red-200">Выйти</button>
               </div>
             )}
           </div>

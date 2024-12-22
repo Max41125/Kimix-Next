@@ -617,10 +617,18 @@ const RussianContract = ({ orderId, currentDate }) => {
                 )}
                 {formDataSupplier.okved && (
                   <p>
-                    ОКВЭД:: <span className="underline">{formDataSupplier.okved}</span>
+                    ОКВЭД: <span className="underline">{formDataSupplier.okved}</span>
                   </p>
                 )}
 
+                {formDataSupplier.legal_address && (
+
+                    <p>
+                    Адрес: <span className="underline">{formDataSupplier.legal_address}</span>
+                    </p>
+
+
+                )}
 
 
               </div>

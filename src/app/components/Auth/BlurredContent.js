@@ -10,8 +10,7 @@ const BlurredContent = ({ children, role }) => {
 
 
   const isAuthorized = user && user.role === role;
-  
-  console.log('User:', user);
+
 
   return (
     <div className="relative">

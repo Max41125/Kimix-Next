@@ -602,6 +602,14 @@ const EnglishContract = ({ orderId, currentDate }) => {
                     OKVED:: <span className="underline">{formDataSupplier.okved}</span>
                   </p>
                 )}
+                {formDataSupplier.legal_address && (
+
+                  <p>
+                  Address: <span className="underline">{formDataSupplier.legal_address}</span>
+                  </p>
+
+
+                  )}
 
 
 

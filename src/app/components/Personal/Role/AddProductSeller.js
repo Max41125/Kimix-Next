@@ -10,8 +10,12 @@ const SellerContent = ({ userId, userToken }) => {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [userProducts, setUserProducts] = useState([]);
   const [selectedUnits, setSelectedUnits] = useState({});
-  const [productPrices, setProductPrices] = useState({}); // Состояние для хранения цен на товары
+  const [productPrices, setProductPrices] = useState({});
   const [currencyUnits, setCurrencyUnits] = useState({});
+  const [debounceTimeout, setDebounceTimeout] = useState(null); 
+  const [hasSearched, setHasSearched] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
+
   const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
 
   // Получение всех товаров пользователя при загрузке компонента
@@ -33,21 +37,45 @@ const SellerContent = ({ userId, userToken }) => {
     fetchUserProducts();
   }, [userId, userToken]);
 
-  const handleSearch = async (event) => {
+  // Обработчик поиска с дебаунсом
+  const handleSearch = (event) => {
     const query = event.target.value;
     setSearchTerm(query);
 
-    if (query.length >= 2) {
-      try {
-        const response = await axios.get(`https://test.kimix.space/api/chemicals/search?q=${query}`);
-        setChemicals(response.data);
-      } catch (error) {
-        console.error("Ошибка при поиске товаров:", error);
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout); // Очищаем предыдущий таймер, если есть
+    }
+
+    const newTimeout = setTimeout(() => {
+      if (query.length >= 2) {
+        searchProducts(query); // Функция поиска
+        setHasSearched(true); // Отметим, что поиск был выполнен
+      } else {
+        setChemicals([]); // Очистка результатов, если меньше 2 символов
+        setHasSearched(false); // Если очистка, сбрасываем флаг поиска
       }
-    } else {
-      setChemicals([]); // Очистка результатов, если меньше 2 символов
+    }, 500); // 500 мс задержка после последнего ввода
+
+    setDebounceTimeout(newTimeout);
+  };
+
+  const searchProducts = async (query) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`https://test.kimix.space/api/chemicals/search?q=${query}`);
+      setHasSearched(true); // Устанавливаем hasSearched в true после первого запроса
+      if (response.data.length === 0) {
+        setChemicals([]); // Сохраняем пустой массив, если ничего не найдено
+      } else {
+        setChemicals(response.data); // Сохраняем данные, если найдены товары
+      }
+    } catch (error) {
+      console.error("Ошибка при поиске товаров:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
+  
 
   const handleSelectProduct = (id, title) => {
     if (!selectedProducts.some(product => product.id === id)) {
@@ -71,16 +99,13 @@ const SellerContent = ({ userId, userToken }) => {
     const newCurrencyUnits = { ...currencyUnits };
     delete newCurrencyUnits[id]; // Удаляем выбранную единицу
     setCurrencyUnits(newCurrencyUnits);
-
-
   };
 
   const handleRemoveProductStore = async (productId) => {
     try {
       await axios.get(csrfUrl, {
         withCredentials: true,
-
-    });
+      });
       await axios.delete(`https://test.kimix.space/api/users/${userId}/products`, {
         data: { products: [productId] },
         headers: {
@@ -95,24 +120,19 @@ const SellerContent = ({ userId, userToken }) => {
     }
   };
 
-
   const handleSubmit = async () => {
     try {
       const productIds = selectedProducts.map(product => ({
         id: product.id,
-        unit_type: selectedUnits[product.id], // Получаем тип единицы
-        currency: currencyUnits[product.id], // Добавляем валюту, можно изменить если хотите добавить выбор валюты для каждого товара
-        price: productPrices[product.id], // Добавляем цену
+        unit_type: selectedUnits[product.id],
+        currency: currencyUnits[product.id],
+        price: productPrices[product.id],
       }));
-      await axios.get(csrfUrl, {
-        withCredentials: true,
-      });
+      await axios.get(csrfUrl, { withCredentials: true });
       await axios.put(`https://test.kimix.space/api/users/${userId}/products`, 
         { products: productIds },
         {
-          headers: {
-            Authorization: `Bearer ${userToken}` 
-          },
+          headers: { Authorization: `Bearer ${userToken}` },
           withCredentials: true,
           withXSRFToken: true,
         }
@@ -125,15 +145,10 @@ const SellerContent = ({ userId, userToken }) => {
       
       const response = await axios.get(`https://test.kimix.space/api/users/${userId}/products`, {
         headers: {
-          Authorization: `Bearer ${userToken}` // Включаем токен в заголовок
+          Authorization: `Bearer ${userToken}`
         }
       });
-      const products = response.data;
-      setUserProducts(products); // Сохраняем данные о товарах пользователя
-
-
-
-
+      setUserProducts(response.data);
     } catch (error) {
       console.error("Ошибка при обновлении товаров:", error);
     }
@@ -149,7 +164,6 @@ const SellerContent = ({ userId, userToken }) => {
     }
   };
 
-
   const translateUnitType = (unitType) => {
     switch (unitType) {
       case 'grams': return 'Гр.';
@@ -159,38 +173,54 @@ const SellerContent = ({ userId, userToken }) => {
       default: return unitType;
     }
   };
+
   return (
     <>
-      <div className="p-4">
+    <div className="p-4">
         <h2 className="text-lg font-bold">Добавление товаров</h2>
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={handleSearch}
-          placeholder="Поиск товара..."
-          className="border border-gray-300 p-2 rounded w-full"
-        />
-        {chemicals.length > 0 && (
-          <ul className="mt-2 border border-gray-300 bg-white  rounded max-h-96 overflow-y-auto">
-            {chemicals.map((chemical) => (
-              <li
-                key={chemical.id}
-                className={`p-2 cursor-pointer transition hover:bg-gray-200 ${selectedProducts.some(product => product.id === chemical.id) ? 'bg-gray-300' : ''}`}
-                onClick={() => handleSelectProduct(chemical.id, chemical.title)}
-              >
-                <p>Название: {chemical.title}</p>
-                <p>CAS Number: {chemical.cas_number}</p>
-                <p>Формула: {chemical.formula}</p>
-              </li>
-            ))}
-          </ul>
-        )}
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={handleSearch}
+        placeholder="Поиск товара..."
+        className="border border-gray-300 p-2 rounded w-full"
+      />
+      
+      {isLoading ? (
+      <div className="flex justify-center items-center mt-4">
+        <div className="loader"></div> {/* Здесь добавьте ваш спиннер */}
+      </div>
+      ) : hasSearched && ( // Показываем результат поиска только после первого запроса
+        <div>
+          {chemicals.length > 0 ? (
+            <ul className="mt-2 border border-gray-300 bg-white rounded max-h-96 overflow-y-auto">
+              {chemicals.map((chemical) => (
+                <li
+                  key={chemical.id}
+                  className={`p-2 cursor-pointer transition hover:bg-gray-200 ${selectedProducts.some(product => product.id === chemical.id) ? 'bg-gray-300' : ''}`}
+                  onClick={() => handleSelectProduct(chemical.id, chemical.title)}
+                >
+                  <p>Название: {chemical.title}</p>
+                  <p>CAS Number: {chemical.cas_number}</p>
+                  <p>Формула: {chemical.formula}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Ничего не найдено</p>
+          )}
+        </div>
+      )}
+
+          
+
+
         {selectedProducts.length > 0 && (
           <div className="mt-4 bg-white rounded-lg">
             <h3 className="font-semibold p-4">Выбранные товары:</h3>
             <ul>
               {selectedProducts.map((product) => (
-                <li key={product.id} className="flex  border-gray-100 p-4 items-center justify-between">
+                <li key={product.id} className="flex border-gray-100 p-4 items-center justify-between">
                   <span>{product.title}</span>
                   <div className="flex items-center">
                     <select
@@ -245,23 +275,22 @@ const SellerContent = ({ userId, userToken }) => {
       <div className="lg:p-4 p-2">
         <h2 className="text-lg font-bold">Ваши товары</h2>
         {userProducts.length > 0 ? (
-          <ul className="mt-2  overflow-y-auto flex flex-col gap-5">
+          <ul className="mt-2 overflow-y-auto flex flex-col gap-5">
             {userProducts.map((product) => (
               <li key={product.id} className="p-2 flex lg:flex-row flex-col gap-2 bg-white rounded-xl justify-between items-center">
                 <div className='flex lg:flex-row flex-col gap-2 w-full'>
-                  
                   <div className="flex justify-center items-center lg:w-48 w-full h-40  border rounded">
                     {product.image ? (
                       <ReactSVG 
                         src={`data:image/svg+xml;utf8,${encodeURIComponent(product.image)}`} 
-                        className="flex items-center" // Задаем ширину и высоту
+                        className="flex items-center" 
                       />
                     ) : (
                       <Image
-                        src={NotFound} // Иконка по умолчанию
+                        src={NotFound}
                         alt="No image"
                         height={150}
-                        className="flex flex-col" // Чтобы иконка сохраняла пропорции
+                        className="flex flex-col"
                       />
                     )}
                   </div>
