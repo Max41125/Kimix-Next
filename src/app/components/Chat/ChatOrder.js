@@ -290,10 +290,10 @@ const sortedItems = mergedMessagesAndDocs.sort((a, b) => {
 
 
   return (
-    <div className="my-6 flex gap-4 flex-col lg:flex-row container mx-auto">
-      <div className="p-6 bg-gray-100 rounded-lg shadow-md w-8/12">
+    <div className="my-6 flex gap-4 flex-col lg:flex-row lg:p-0 p-2 container mx-auto">
+      <div className="lg:p-6 p-2 bg-gray-100 rounded-lg shadow-md lg:w-8/12 w-full">
         <h2 className="text-xl font-semibold mb-4">Чат по заказу №{orderId}</h2>
-        <div className="h-96 overflow-y-auto mb-4 p-4 bg-white rounded-md shadow-inner">
+        <div className="h-96 overflow-y-auto overflow-x-hidden mb-4 p-4 bg-white rounded-md shadow-inner">
         {sortedItems.map((item, index) => {
           if (item.type === 'message') {
             // Это сообщение
@@ -368,11 +368,11 @@ const sortedItems = mergedMessagesAndDocs.sort((a, b) => {
         )}
       </div>
 
-      <div className="p-6 bg-gray-100 rounded-lg shadow-md w-4/12 flex flex-col gap-2">
+      <div className="lg:p-6 p-2 bg-gray-100 rounded-lg shadow-md  lg:w-4/12  w-full flex flex-col gap-2">
         <p className="text-xl font-semibold">Статус заказа</p>
         <OrderProgressLine status={contractStatus} />
         {documents?.length > 0 && (
-          <div className="bg-white p-2 flex flex-col rounded-xl">
+          <div className="bg-white p-2 flex flex-col rounded-xl overflow-hidden">
             <p>Документы по заказу</p>
             {documents.map((doc) => (
               <a

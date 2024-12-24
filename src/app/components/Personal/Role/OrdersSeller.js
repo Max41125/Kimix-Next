@@ -99,7 +99,7 @@ const OrdersSeller = ({ userId, userToken }) => {
                   <ul className="space-y-2">
                     {order.products.map(product => (
                       <li key={product.id} className="p-2 bg-white border rounded-md shadow-sm">
-                        <div className="flex items-center">
+                        <div className="flex flex-wrap justify-center gap-2 items-center">
                         {product.image ? (
                           <ReactSVG 
                             src={`data:image/svg+xml;utf8,${encodeURIComponent(product.image)}`} 
@@ -121,10 +121,10 @@ const OrdersSeller = ({ userId, userToken }) => {
                             <div>{product.title}</div>
                             <div className="text-sm text-gray-500">CAS номер: {product.cas_number}</div>
                           </div>
-                          <div className='flex flex-col ml-auto items-center justify-center'>
+                          <div className='flex flex-col ml-auto items-center justify-center lg:w-auto w-full'>
                           <Link
                           href={`/dashboard/chat?orderId=${order.id}`}
-                          className=' p-4 rounded-full bg-gray-300 transition transition-colors hover:bg-indigo-400'>
+                          className=' p-4 rounded-full bg-gray-300 transition transition-colors hover:bg-indigo-400 lg:w-auto  text-center w-full'>
                             Чат с покупателем
                           </Link>
 

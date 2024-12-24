@@ -74,8 +74,10 @@ const ChemicalProduct = () => {
 
       addToCart(newItem); 
       
-      setIsAdded(true); // Устанавливаем состояние "добавлено"
-      setTimeout(() => setIsAdded(false), 2000);
+      setIsAdded((prev) => ({ ...prev, [supplier.id]: true }));
+      setTimeout(() => {
+        setIsAdded((prev) => ({ ...prev, [supplier.id]: false }));
+      }, 2000);
  
  
     };
@@ -114,7 +116,7 @@ const ChemicalProduct = () => {
   
     return (
       <>
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto lg:p-4 p-2">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:gap-8 gap-2 bg-white rounded-lg shadow-lg lg:p-6 p-2">
             <div className="flex justify-center items-center">
               {chemical.image ? (
@@ -135,21 +137,21 @@ const ChemicalProduct = () => {
             </div>
   
             <div className="flex flex-col space-y-4">
-              {chemical.title && (<h1 className="lg:text-3xl text-xl font-bold">{chemical.title}</h1>)}
-              {chemical.russian_common_name && (<h2 className="lg:text-3xl text-xl  font-bold">({chemical.russian_common_name})</h2>)}
+              {chemical.title && (<h1 className="lg:text-3xl text-lg font-bold">{chemical.title}</h1>)}
+              {chemical.russian_common_name && (<h2 className="lg:text-3xl text-lg font-bold">({chemical.russian_common_name})</h2>)}
               {chemical.cas_number && (<p><strong>CAS:</strong> {chemical.cas_number}</p>)}
               {chemical.formula && (<p><strong>Формула:</strong> {chemical.formula}</p>)}
               {chemical.molecular_weight && (<p><strong>Молекулярный вес:</strong> {chemical.molecular_weight} g/mol</p>)}
             
                 {suppliers?.length > 0 && (
                   <div>
-                    <h2 className="lg:text-xl text-lg font-semibold">Поставщики:</h2>
+                    <h2 className="lg:text-xl text-m font-semibold mb-2">Поставщики:</h2>
                     {user?.role === 'buyer' ? (
                       <>
                         {suppliers?.map((supplier) => (
-                          <div key={supplier.id} className="lg:p-4 lg:mt-2 p-2  bg-gray-100 rounded-lg shadow-md grid grid-cols-2">
-                            <div className="flex flex-col gap-4">
-                              {supplier.name && (<p className='lg:text-lg text-base'><strong>Поставщик:</strong> {supplier.name}</p>)}
+                          <div key={supplier.id} className="lg:p-4 lg:mt-2 p-2 mb-4  bg-gray-100 rounded-lg shadow-md lg:grid lg:grid-cols-2 flex flex-col">
+                            <div className="flex flex-col lg:gap-4 gap-2">
+                              {supplier.name && (<p className='lg:text-lg text-sm'><strong>Поставщик:</strong> {supplier.name}</p>)}
                               {supplier.price && (
                                 <p className='lg:text-base text-sm'>
                                   <strong>Цена:</strong> {supplier.price} {getCurrencySymbol(supplier.currency)} за 1 ед. {translateUnitType(supplier.unit_type)}
@@ -174,12 +176,12 @@ const ChemicalProduct = () => {
                                     <motion.button
                                       onClick={() => handleAddToCart(supplier, quantities[supplier.id])} 
                                       className={`inline-block lg:px-6 lg:py-3 py-2 text-sm px-2 ${
-                                        isAdded ? 'bg-green-500' : 'bg-green-500'
+                                        isAdded[supplier.id] ? 'bg-green-500' : 'bg-green-500'
                                       } text-white rounded-lg justify-center items-center flex flex-col text-sm font-medium hover:${
-                                        isAdded ? 'bg-green-600' : 'bg-green-600'
+                                        isAdded[supplier.id] ? 'bg-green-600' : 'bg-green-600'
                                       } transition-colors justify-center items-center flex flex-col   duration-300`}
                                     >
-                                        {!isAdded ? (
+                                        {!isAdded[supplier.id] ? (
                                           <motion.span
                                             key="add"
                                             initial={{ opacity: 0, y: -10 }}
@@ -239,7 +241,7 @@ const ChemicalProduct = () => {
           {chemical.russian_description && (
             <>
           <div className='mt-8 bg-white p-6 rounded-lg shadow-lg'>
-            <h2 className="text-2xl font-bold mb-4 cursor-pointer flex items-center gap-2" onClick={() => setOpenDescription(!openDescription)}>
+            <h2 className="lg:text-2xl text-lg font-bold mb-4 cursor-pointer flex items-center gap-2" onClick={() => setOpenDescription(!openDescription)}>
               Описание
               {openDescription ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
             </h2>
@@ -269,7 +271,7 @@ const ChemicalProduct = () => {
 
         <>
         <div className='mt-8 bg-white p-6 rounded-lg shadow-lg'>
-          <h2 className="text-2xl font-bold mb-4 cursor-pointer flex items-center gap-2" onClick={() => setOpenSynonyms(!openSynonyms)}>
+          <h2 className="lg:text-2xl text-lg  font-bold mb-4 cursor-pointer flex items-center gap-2" onClick={() => setOpenSynonyms(!openSynonyms)}>
             Синонимы
             {openSynonyms ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
           </h2>
@@ -316,7 +318,7 @@ const ChemicalProduct = () => {
       {chemical.inchi && (
         <>
           <div className='mt-8 bg-white p-6 rounded-lg shadow-lg'>
-            <h2 className="text-2xl font-bold mb-4 cursor-pointer flex items-center gap-2" onClick={() => setOpenInchi(!openInchi)}>
+            <h2 className="lg:text-2xl text-lg  font-bold mb-4 cursor-pointer flex items-center gap-2" onClick={() => setOpenInchi(!openInchi)}>
               InChi
               {openInchi ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
             </h2>
@@ -345,7 +347,7 @@ const ChemicalProduct = () => {
       {chemical.smiles && (
         <>
         <div className='mt-8 bg-white p-6 rounded-lg shadow-lg'>
-          <h2 className="text-2xl font-bold mb-4 cursor-pointer flex items-center gap-2" onClick={() => setOpenSmiles(!openSmiles)}>
+          <h2 className="lg:text-2xl text-lg  font-bold mb-4 cursor-pointer flex items-center gap-2" onClick={() => setOpenSmiles(!openSmiles)}>
             Smiles
             {openSmiles ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
           </h2>

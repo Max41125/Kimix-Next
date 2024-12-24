@@ -47,7 +47,7 @@ const StatusLine = ({ status }) => {
 
   return (
     <div className="flex items-center justify-center w-full mt-8 mb-12 progress__Line">
-      <div className="relative flex items-center justify-between w-80 max-w-lg">
+      <div className="relative flex items-center justify-between lg:w-80 lg:max-w-lg w-60">
         {visibleStatuses.map((item, index) => {
           if (!item) return null;
 

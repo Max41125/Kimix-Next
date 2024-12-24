@@ -53,7 +53,7 @@ const CartList = () => {
     <div className="container mx-auto p-4">
       <ul className="space-y-4">
         {cart.map((item, index) => (
-          <li key={index} className="p-4 bg-white rounded-lg shadow-md flex gap-2 items-center">
+          <li key={index} className="p-4 bg-white rounded-lg shadow-md flex flex-wrap gap-2 items-center justify-center">
      
 
 
@@ -75,7 +75,7 @@ const CartList = () => {
 
 
 
-            <div>
+            <div className='lg:w-auto w-full'>
               <p><strong>Название:</strong> {item.title}</p>
               <p><strong>Количество:</strong> {item.quantity}</p>
               <p><strong>Цена:</strong> {item.price} {getCurrencySymbol(item.currency)}</p>
@@ -84,21 +84,21 @@ const CartList = () => {
             </div>
             <button
               onClick={() => removeFromCart(index)}
-              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 ml-auto transition-colors duration-300"
+              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 lg:ml-auto lg:w-auto w-full transition-colors duration-300"
             >
               Удалить
             </button>
           </li>
         ))}
       </ul>
-      <div className="mt-4 flex justify-between">
+      <div className="mt-4 flex flex-wrap gap-4 justify-between">
         <button
           onClick={clearCart}
-          className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-300"
+          className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-300 lg:w-auto w-full text-center"
         >
           Очистить корзину
         </button>
-        <Link href="/checkout" className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 active:scale-105  transition duration-300">
+        <Link href="/checkout" className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 active:scale-105  transition duration-300 lg:w-auto w-full text-center">
           Оформить заказ
         </Link>
       </div>

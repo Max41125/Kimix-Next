@@ -316,13 +316,13 @@ const CheckoutMain = () => {
               ))}
             </select>
 
-            <ul className="mt-2 flex flex-col gap-4">
+            <ul className="mt-2 flex flex-col gap-4 mb-2">
               {cart
                 .filter(item => item.supplier === selectedSupplier)
                 .map((item, index) => {
                   const itemTotal = item.price * item.quantity;
                   return (
-                    <li key={index} className="flex gap-8">
+                    <li key={index} className="flex flex-wrap lg:gap-8 lg:border-none lg:p-0 gap-2 p-2  border-2 rounded border-gray-300 ">
                       {/* Изображение товара */}
                       {item.image ? (
                         <ReactSVG
@@ -335,13 +335,13 @@ const CheckoutMain = () => {
                       ) : (
                         <Image src={NotFound} alt="No image" className="flex flex-col w-20 h-20" />
                       )}
-                      <div className="flex flex-col border-r-2 border-gray-300 pr-4">
+                      <div className="flex flex-col lg:border-r-2 border-gray-300 pr-4">
                         <span>{item.title}</span>
                         <p><strong>Количество:</strong> {item.quantity}</p>
                         <p><strong>Ед. измерения:</strong> {translateUnitType(item.unit_type)}</p>
                         <p><strong>Цена за единицу:</strong> {item.price} {getCurrencySymbol(item.currency)}</p>
                       </div>
-                      <div className='ml-auto flex flex-col'>
+                      <div className='lg:ml-auto flex flex-col'>
                         <p><strong>Цена:</strong> {itemTotal} {getCurrencySymbol(item.currency)}</p>
                       </div>
                     </li>

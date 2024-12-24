@@ -43,7 +43,7 @@ const Header = () => {
           <Link href="/">
             <Image src={Logo} alt="Logo" width={100} height={50} />
           </Link>
-          <form className="w-full px-10 relative" onSubmit={(e) => e.preventDefault()}>
+          <form className="w-full px-10 relative lg:block hidden " onSubmit={(e) => e.preventDefault()}>
             <input
               type="text"
               placeholder="Введите название вещества/формулу/CAS номер"
@@ -62,7 +62,7 @@ const Header = () => {
           </form>
             {user?.role === "buyer" &&(
 
-              <Link href="/cart">
+              <Link href="/cart" className="lg:ml-0 ml-auto">
                 <button className="text-teal-500 mr-4">
                   <BsCart2 size={25} color="#14D8B5" />
                 </button>
