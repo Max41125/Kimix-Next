@@ -5,7 +5,7 @@ import { RxCross1 } from 'react-icons/rx';
 import { useUser } from '../Auth/UserProvider';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-
+import Link from 'next/link';
 
 const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
 
@@ -287,6 +287,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
               {errors.network && <p className="text-red-500 text-sm">{errors.network}</p>}
 
               {isLoginMode && (
+                <>
                 <div className="mb-4">
                   <input
                     type="checkbox"
@@ -296,6 +297,15 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
                   />
                   <label htmlFor="remember" className="ml-2">Запомнить меня</label>
                 </div>
+                <div className="mb-4">
+                        <Link
+                        href='/auth/reset'
+                        className='text-blue-700 underline  decoration-1'>
+                          Забыли пароль?
+                        </Link>
+                      </div>
+
+                </>
               )}
 
               <button

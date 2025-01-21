@@ -13,7 +13,7 @@ const UpdatePassword = ({ userToken, userEmail}) => {
     e.preventDefault();
 
     if (newPassword !== confirmPassword) {
-      setMessage('Новый пароль и подтверждение не совпадают.');
+      setError('Новый пароль и подтверждение не совпадают.');
       return;
     }
 
