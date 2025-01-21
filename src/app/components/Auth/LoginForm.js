@@ -7,6 +7,7 @@ import { CiCircleCheck } from "react-icons/ci";
 import { CiCircleRemove } from "react-icons/ci";
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import Link from 'next/link';
 
 const LoginForm = () => {
   const router = useRouter(); // Инициализация useRouter
@@ -260,19 +261,19 @@ const handleSubmit = async (event) => {
                         </div>
                         <div className="mb-4 flex space-x-2">
                             <label
-                                className={`flex-1 p-2 text-center border rounded ${role === 'buyer' ? 'bg-green-500 text-white' : ''}`}
+                                className={`flex-1 p-2 text-center cursor-pointer border rounded ${role === 'buyer' ? 'bg-green-500 text-white' : ''}`}
                                 onClick={() => handleRoleChange('buyer')}
                             >
                                 Покупатель
                             </label>
                             <label
-                                className={`flex-1 p-2 text-center border rounded ${role === 'student' ? 'bg-blue-500 text-white' : ''}`}
+                                className={`flex-1 p-2 text-center border cursor-pointer rounded ${role === 'student' ? 'bg-blue-500 text-white' : ''}`}
                                 onClick={() => handleRoleChange('student')}
                             >
                                 Студент
                             </label>
                             <label
-                                className={`flex-1 p-2 text-center border rounded ${role === 'seller' ? 'bg-orange-500 text-white' : ''}`}
+                                className={`flex-1 p-2 text-center border cursor-pointer rounded ${role === 'seller' ? 'bg-orange-500 text-white' : ''}`}
                                 onClick={() => handleRoleChange('seller')}
                             >
                                 Продавец
@@ -284,6 +285,7 @@ const handleSubmit = async (event) => {
                     )}
 
                     {isLoginMode && (
+                      <>
                       <div className="mb-4">
                           <input
                               type="checkbox"
@@ -292,7 +294,19 @@ const handleSubmit = async (event) => {
                               onChange={(e) => setRemember(e.target.checked)}
                           />
                           <label htmlFor="remember" className="ml-2">Запомнить меня</label>
+
+
+                          
+
                       </div>
+                      <div className="mb-4">
+                        <Link
+                        href='/auth/reset'
+                        className='text-blue-700 underline  decoration-1'>
+                          Забыли пароль?
+                        </Link>
+                      </div>
+                      </>
                     )}
 
                     <button

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 import InfoSeller from '@/app/components/Personal/Role/InfoSeller';
 import InfoBuyer from '@/app/components/Personal/Role/InfoBuyer';
+import UpdatePassword from '@/app/components/Auth/UpdatePassword';
+
 const GeneralContent = ({ userName, userEmail, userId, userToken, userRole }) => {
 
 
@@ -24,6 +26,7 @@ const GeneralContent = ({ userName, userEmail, userId, userToken, userRole }) =>
       {userRole === 'buyer' && (
         <InfoBuyer userId={userId} userToken={userToken} userRole={userRole}  />
       )}
+      <UpdatePassword userId={userId} userToken={userToken} userEmail={userEmail} />
     </div>
   );
 };
