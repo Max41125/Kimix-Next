@@ -21,9 +21,7 @@ const GeneralContent = ({ userName, userEmail, userId, userToken, userRole, subs
   return (
     <div className="flex flex-col gap-4 p-4 border rounded-lg bg-white  mx-auto shadow-md">
       <div className="flex items-center gap-4">
-        {/* Левая часть: фото профиля */}
         <div className="relative w-24 h-24">
-
           <Image 
           src={profileImage || User}
           alt="User Avatar"
@@ -41,25 +39,23 @@ const GeneralContent = ({ userName, userEmail, userId, userToken, userRole, subs
           </label>
         </div>
 
-        {/* Правая часть: роль и подписка */}
+   
         <div className="flex flex-col items-start gap-1">
           <p className="text-sm font-medium">Роль: <b>{userRole === 'seller' ? 'Продавец' : 'Покупатель'}</b></p>
           <p className="text-sm font-medium">Подписка: <b>{subscription || 'Нет подписки'}</b></p>
+         
+          <p className="text-sm font-medium"> ФИО: <b>{userName}</b></p>
+          <p className="text-sm font-medium">Email: <b>{userEmail}</b></p>
+
         </div>
       </div>
 
-      {/* Центральная часть: информация о пользователе */}
-      <div className="border-t pt-4">
-        <h2 className="text-lg font-bold">Общая информация об аккаунте</h2>
-        <p>ФИО: <b>{userName}</b></p>
-        <p>Email: <b>{userEmail}</b></p>
-      </div>
 
-      {/* Роль-специфичные компоненты */}
+
       {userRole === 'seller' && <InfoSeller userId={userId} userToken={userToken} userRole={userRole} />}
       {userRole === 'buyer' && <InfoBuyer userId={userId} userToken={userToken} userRole={userRole} />}
 
-      {/* Обновление пароля */}
+  
       <UpdatePassword userId={userId} userToken={userToken} userEmail={userEmail} />
 
     </div>
