@@ -7,21 +7,16 @@ import Logo from '/public/logo.svg';
 import UserImg from '/public/user.webp';
 import { CiSearch, CiLogin } from "react-icons/ci";
 import { FaRegCircleUser } from "react-icons/fa6"; 
-import AuthModal from "../Auth/AuthModal"; // Убедитесь, что путь правильный
+
 import { useUser } from '../Auth/UserProvider'; 
 import { BsCart2 } from "react-icons/bs";
 import { HiX } from 'react-icons/hi';
 
 const Header = () => {
   const { user, logout } = useUser() || {}; 
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [isLoginMode, setIsLoginMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDropdownOpen, setDropdownOpen] = useState(false); 
 
-  const toggleModal = () => {
-    setModalOpen(!isModalOpen);
-  };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -70,13 +65,15 @@ const Header = () => {
             )}
           {/* Иконка пользователя */}
           <div className="relative flex flex-col items-center">
-            <button onClick={user ? handleDropdownToggle : toggleModal} className="text-teal-500">
+            <button onClick={user ? handleDropdownToggle : null} className="text-teal-500">
               {user ? 
               <div className="border border-[#14D8B5] w-[40px] h-[40px] overflow-hidden rounded-full bg-gray-300">
                 <Image src={UserImg} width={40} height={40} />
               </div> 
               : 
-              <FaRegCircleUser size={25} color="#14D8B5" />
+              <Link href="/auth">
+                <FaRegCircleUser size={25} color="#14D8B5" />
+              </Link>
               }
             </button>
 
@@ -113,12 +110,7 @@ const Header = () => {
         </div>
       </header>
 
-      <AuthModal
-        isOpen={isModalOpen}
-        toggleModal={toggleModal}
-        isLoginMode={isLoginMode}
-        setIsLoginMode={setIsLoginMode}
-      />
+
     </>
   );
 };

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import userStore from '@/app/components/Auth/userStore'; // Импортируем MobX-хранилище
 import axios from 'axios';
 import Loader from '@/app/components/Loaders/Loader';
+import parseCookies from '@/app/lib/parseCookies';
 
 const UserContext = createContext();
 
@@ -15,9 +16,10 @@ export const UserProvider = ({ children }) => {
     useEffect(() => {
       if (typeof window !== 'undefined') {
           const storedToken = localStorage.getItem('token');
-          
+          const cookies = parseCookies();  
+          const rememberToken = cookies['remember_token'];
           // Проверка, если токен найден в localStorage
-          if (storedToken) {
+          if (rememberToken && storedToken) {
               userStore.setToken(storedToken); // Устанавливаем токен в MobX
 
               // Отправка CSRF запроса
@@ -49,12 +51,11 @@ export const UserProvider = ({ children }) => {
   }, []);
 
     // Логин: сохраняем данные пользователя и токен в MobX
-    const login = (userData, authToken, remember) => {
+    const login = (userData, authToken) => {
         userStore.setUser(userData);
         userStore.setToken(authToken);
-        if (remember) {
-            localStorage.setItem('token', authToken);  // Сохраняем токен в localStorage
-        }
+        localStorage.setItem('token', authToken);
+       
     };
 
     // Логаут: очищаем состояние в MobX и удаляем токен из localStorage

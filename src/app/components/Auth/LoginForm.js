@@ -27,7 +27,11 @@ const LoginForm = () => {
     setRole(selectedRole);
   };
 
-
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log("Обновленные ошибки:", errors);
+    }
+  }, [errors]);
 
 
 
@@ -111,7 +115,7 @@ const LoginForm = () => {
       console.error('Request error:', error);
       setErrors((prevErrors) => ({
         ...prevErrors,
-        network: 'Ошибка сети. Попробуйте снова.'
+        
       }));
     }
   };
@@ -143,7 +147,7 @@ const LoginForm = () => {
 
             if (data.verify) {
               console.log('Success:', data);
-              login({ email: data.email, role: data.role, name: data.name, id:data.id }, data.token, remember);
+              login({ email: data.email, role: data.role, name: data.name, id:data.id }, data.token);
               router.push('/dashboard'); // Перенаправляем на дашборд
             } else {
               setVerificationMessage("Пожалуйста, подтвердите вашу почту.");
@@ -151,12 +155,18 @@ const LoginForm = () => {
             }
        
     } catch (error) {
-        console.error('Request error:', error.response ? error.response.data : error);
-        setErrors((prevErrors) => ({
-            ...prevErrors,
-            network: 'Ошибка сети. Попробуйте снова.'
-        }));
-    }
+      console.error("Ошибка запроса:", error); 
+      console.error("Ответ от сервера:", error.response?.data);
+      
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        message: error.response?.data?.message || "Ошибка входа",
+      }));
+    
+      console.log("Обновленные ошибки:", errors);
+    
+  }
+  
 };
 
 
@@ -171,19 +181,13 @@ const handleSubmit = async (event) => {
     await registerUser(); // Логика регистрации
   }
 
-    // Сброс значений после успешной отправки (необходимо оставить только для успешного логина)
-    if (isLoginMode) {
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-      setName('');
-      setRole('');
-      setErrors({}); // Сброс ошибок
-    }
 
 };
 
-
+const handleSwitchMode = (mode) => {
+  setIsLoginMode(mode);
+  setErrors({}); // Сброс ошибок при смене режима
+};
 
 
 
@@ -198,13 +202,13 @@ const handleSubmit = async (event) => {
                 <div className="flex justify-center mb-4">
                     <button
                       className={`px-4 py-2 w-6/12 mr-2 rounded ${isLoginMode ? 'bg-teal-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-                      onClick={() => setIsLoginMode(true)}
+                      onClick={() => handleSwitchMode(true)}
                     >
                       Вход
                     </button>
                     <button
                       className={`px-4 py-2 w-6/12 rounded ${!isLoginMode ? 'bg-teal-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-                      onClick={() => setIsLoginMode(false)}
+                      onClick={() => handleSwitchMode(false)}
                     >
                       Регистрация
                     </button>
@@ -280,7 +284,7 @@ const handleSubmit = async (event) => {
                             </label>
                         </div>
                         {errors.role && <p className="text-red-500 text-sm">{errors.role}</p>}
-                        {errors.network && <p className="text-red-500 text-sm">{errors.network}</p>}
+                     
                       </>
                     )}
 
@@ -306,6 +310,8 @@ const handleSubmit = async (event) => {
                           Забыли пароль?
                         </Link>
                       </div>
+               
+                      
                       </>
                     )}
 
@@ -314,7 +320,9 @@ const handleSubmit = async (event) => {
                       className="bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600 w-full"
                     >
                       {isLoginMode ? 'Вход' : 'Регистрация'}
+                      
                     </button>
+                    {errors.message && <p className="text-red-500 text-sm">{errors.message}</p>}
                 </form>
 
                 {/* Уведомление о подтверждении регистрации */}
