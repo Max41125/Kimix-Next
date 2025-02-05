@@ -18,6 +18,7 @@ export const UserProvider = ({ children }) => {
           const storedToken = localStorage.getItem('token');
           const cookies = parseCookies();  
           const rememberToken = cookies['remember_token'];
+          console.log(cookies);
           // Проверка, если токен найден в localStorage
           if (rememberToken && storedToken) {
               userStore.setToken(storedToken); // Устанавливаем токен в MobX
@@ -45,7 +46,8 @@ export const UserProvider = ({ children }) => {
                   setLoading(false); // Ошибка получения CSRF токена, меняем состояние
               });
           } else {
-              setLoading(false); // Если токен отсутствует, сразу меняем состояние
+                
+                setLoading(false); // Если токен отсутствует, сразу меняем состояние
           }
       }
   }, []);

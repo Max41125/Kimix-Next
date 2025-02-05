@@ -9,8 +9,6 @@ const ParticlesBackground = ({ children }) => {
         console.log(engine);
         await loadSlim(engine);
 
-        // LOAD ANY ONE 
-        // await loadFull(engine);
     }, []);
 
     const particlesLoaded = useCallback(async container => {
