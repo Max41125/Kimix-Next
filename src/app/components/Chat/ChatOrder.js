@@ -33,7 +33,7 @@ const ChatOrder = () => {
   const [hasPermission, setHasPermission] = useState(true);
   const messagesEndRef = useRef(null);
   const [loading, setLoading] = useState(true); 
-  const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+  const csrfUrl = process.env.NEXT_PUBLIC_CSRF_URL;
   const { user, token } = useUser() || { user: null, token: null };
   const router = useRouter();
   
@@ -170,7 +170,7 @@ const ChatOrder = () => {
     try {
       // Отправка текста сообщения
       if (message) {
-        await axios.post('https://test.kimix.space/api/auth/send-message', {
+        await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/send-message`, {
           message,
           user_id: user.id,
           username: user.name,
@@ -192,7 +192,7 @@ const ChatOrder = () => {
   
         try {
           // Отправка формы с файлом
-          const response = await axios.post('https://test.kimix.space/api/auth/chat/upload', formData, {
+          const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/chat/upload`, formData, {
             headers: { 
               Authorization: `Bearer ${token}`, 
               'Content-Type': 'multipart/form-data' 
@@ -334,7 +334,7 @@ const sortedItems = mergedMessagesAndDocs.sort((a, b) => {
           }
         })}
 
-        {/* Ссылка на конец чата для прокрутки */}
+    
           <div ref={messagesEndRef} />
      
 

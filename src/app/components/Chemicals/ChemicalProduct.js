@@ -13,20 +13,20 @@ import axios from 'axios';
 import { motion, AnimatePresence } from "framer-motion";
 import { CiCircleCheck } from "react-icons/ci";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi"; // Иконки стрелочек
+import SubscriptionForm from './Subscribe/SubscribeForm';
 
 const ChemicalProduct = () => {
     const searchParams = useSearchParams(); 
     const id = searchParams.get('id'); 
-    const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+    const csrfUrl = process.env.NEXT_PUBLIC_CSRF_URL;
     const [chemical, setChemical] = useState(null);
     const [synonyms, setSynonyms] = useState(null);
+    
     const [suppliers, setSuppliers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [quantities, setQuantities] = useState({}); // Состояние для количеств
     const [isAdded, setIsAdded] = useState(false);
-
-    const [openDescription, setOpenDescription] = useState(false);
     const [openSynonyms, setOpenSynonyms] = useState(false);
     const [openInchi, setOpenInchi] = useState(false);
     const [openSmiles, setOpenSmiles] = useState(false);
@@ -38,12 +38,11 @@ const ChemicalProduct = () => {
         if (!id) return; 
   
         try {
-          await axios.get(csrfUrl, { withCredentials: true });
+          
           const res = await axios.get(`https://test.kimix.space/api/chemicals/${id}`, { withCredentials: true });
           const supplierRes = await axios.get(`https://test.kimix.space/api/auth/chemicals/${id}/suppliers`, { withCredentials: true });
-          setChemical(res.data.chemical);  // Сохраняет информацию о химическом веществе
+          setChemical(res.data.chemical);  
           setSynonyms(res.data.synonyms); 
-       
           setSuppliers(supplierRes.data);
         } catch (err) {
           setError(err.message);
@@ -143,12 +142,25 @@ const ChemicalProduct = () => {
               {chemical.formula && (<p><strong>Формула:</strong> {chemical.formula}</p>)}
               {chemical.molecular_weight && (<p><strong>Молекулярный вес:</strong> {chemical.molecular_weight} g/mol</p>)}
             
-                {suppliers?.length > 0 && (
-                  <div>
-                    <h2 className="lg:text-xl text-m font-semibold mb-2">Поставщики:</h2>
+              {chemical.russian_description && (
+                <div>
+                  <p><strong>Описание:</strong></p>
+                  <p className='text-sm text-gray-600'>{chemical.russian_description}</p>
+                </div>
+               )}
+           
+            </div>
+          </div>
+  
+          {suppliers?.length > 0 && (
+                  <div className='w-full border-[#14d8b569] border rounded-lg p-2 my-5 bg-white shadow-lg'>
+                  
                     {user?.role === 'buyer' ? (
                       <>
-                        {suppliers?.map((supplier) => (
+
+                      <SubscriptionForm userId={user.id} chemicalId={chemical.id} role={user.role} />
+                  
+                        {/*suppliers?.map((supplier) => (
                           <div key={supplier.id} className="lg:p-4 lg:mt-2 p-2 mb-4  bg-gray-100 rounded-lg shadow-md lg:grid lg:grid-cols-2 flex flex-col">
                             <div className="flex flex-col lg:gap-4 gap-2">
                               {supplier.name && (<p className='lg:text-lg text-sm'><strong>Поставщик:</strong> {supplier.name}</p>)}
@@ -172,7 +184,7 @@ const ChemicalProduct = () => {
                                     initial={{ opacity: 1 }}
                                     animate={{ opacity: 1 }}
                                   >
-                                    {/* Кнопка */}
+                                 
                                     <motion.button
                                       onClick={() => handleAddToCart(supplier, quantities[supplier.id])} 
                                       className={`inline-block lg:px-6 lg:py-3 py-2 text-sm px-2 ${
@@ -213,7 +225,7 @@ const ChemicalProduct = () => {
 
                             </div>
                           </div>
-                        ))}
+                        ))*/}
                       </>
                     ) : (
                       <BlurredContent role="buyer">
@@ -234,38 +246,8 @@ const ChemicalProduct = () => {
   
                   </div>
                 )}
-           
-            </div>
-          </div>
-  
-          {chemical.russian_description && (
-            <>
-          <div className='mt-8 bg-white p-6 rounded-lg shadow-lg'>
-            <h2 className="lg:text-2xl text-lg font-bold mb-4 cursor-pointer flex items-center gap-2" onClick={() => setOpenDescription(!openDescription)}>
-              Описание
-              {openDescription ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
-            </h2>
-            <AnimatePresence initial={false}>
-            {openDescription  && (
-            <motion.div 
-            key="content"
-            initial="collapsed"
-            animate="open"
-            exit="collapsed"
-            variants={{
-              open: { opacity: 1, height: "auto" },
-              collapsed: { opacity: 0, height: 0 }
-            }}
-            transition={{ duration: 0.8, ease: [0.04, 0.62, 0.23, 0.98] }}
-              >
-              <p>{chemical.russian_description}</p>
-            </motion.div>
-              )}
-            </AnimatePresence>
-       
-          </div>
-          </>
-      )}
+
+
 
       {synonyms?.length > 0 && (
 

@@ -14,7 +14,7 @@ const ResetPasswordForm = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
-    const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+    const csrfUrl = process.env.NEXT_PUBLIC_CSRF_URL;
     // Проверка пароля (минимум 8 символов)
     const isValidPassword = (password) => password.length >= 8;
 
@@ -50,7 +50,7 @@ const ResetPasswordForm = () => {
             });
 
 
-            const response = await axios.post('https://test.kimix.space/api/auth/reset-password', {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/reset-password`, {
                 email,
                 password,
                 password_confirmation: confirmPassword,

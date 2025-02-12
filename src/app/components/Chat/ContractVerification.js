@@ -6,7 +6,7 @@ const ContractVerification = ({ userRole, userId, userToken, orderId, contractSt
   const [status, setStatus] = useState(null); // Исправлено на null
   const [loading, setLoading] = useState(true); // Изначально состояние загрузки
   const [error, setError] = useState(null);
-  const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+  const csrfUrl = process.env.NEXT_PUBLIC_CSRF_URL;
 
   useEffect(() => {
     const fetchContractStatus = async () => {

@@ -102,8 +102,8 @@ const ChemicalsPage = () => {
         </div>
 
         <div className=" container mx-auto">
-            {loading && <Circle />} {/* Show loader if loading */}
-            {error && <div>Ошибка: {error}</div>} {/* Show error if any */}
+            {loading && <Circle />} 
+            {error && <div>Ошибка: {error}</div>} 
             {!loading && !error && chemicalList.length > 0 && (
             <ChemicalList chemicals={chemicalList} />
             )}

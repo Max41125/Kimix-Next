@@ -30,7 +30,7 @@ const InfoSeller = ({ userId, userToken, userRole }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
   // URL API для работы с данными продавца
-  const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+  const csrfUrl = process.env.NEXT_PUBLIC_CSRF_URL;
   const sellerApiUrl = `https://test.kimix.space/api/seller`; // Обновить URL
 
   // Запросы выполняются только если userRole === "seller"
@@ -116,7 +116,7 @@ const InfoSeller = ({ userId, userToken, userRole }) => {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {error && <p className="text-red-500">{error}</p>}
 
-        {/* Выбор типа */}
+     
         <label>
           <span className="font-medium">Тип:</span>
           <select
@@ -129,7 +129,7 @@ const InfoSeller = ({ userId, userToken, userRole }) => {
           </select>
         </label>
 
-        {/* Общие поля */}
+      
         <label>
           <span className="font-medium">Полное наименование:</span>
           <input
@@ -191,7 +191,7 @@ const InfoSeller = ({ userId, userToken, userRole }) => {
           />
         </label>
 
-        {/* Поля, специфичные для типа */}
+      
         {type === 'ИП' && (
           <>
             <label>
@@ -274,7 +274,7 @@ const InfoSeller = ({ userId, userToken, userRole }) => {
           </>
         )}
 
-        {/* Общие банковские данные */}
+    
         <label>
           <span className="font-medium">Наименование банка:</span>
           <input
@@ -336,7 +336,7 @@ const InfoSeller = ({ userId, userToken, userRole }) => {
           />
         </label>
 
-        {/* Кнопка отправки */}
+      
         <button
           type="submit"
           className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"

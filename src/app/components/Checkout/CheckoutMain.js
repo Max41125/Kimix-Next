@@ -10,7 +10,7 @@ import Image from 'next/image';
 import NotFound from '/public/notfound.svg';
 import { useRouter } from 'next/navigation';
 const CheckoutMain = () => {
-  const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+  const csrfUrl = process.env.NEXT_PUBLIC_CSRF_URL;
   const router = useRouter();
   const { cart, clearCart } = useCart() || {};
   const { user, token } = useUser() || {};
@@ -110,7 +110,7 @@ const CheckoutMain = () => {
 
     try {
       await axios.get(csrfUrl, { withCredentials: true });
-      const response = await axios.post('https://test.kimix.space/api/orders', orderData, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders`, orderData, {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
         withXSRFToken:true,
@@ -300,7 +300,7 @@ const CheckoutMain = () => {
           <div className="border-2 border-gray-300 rounded-lg flex flex-col p-10 w-full lg:w-2/4">
             <h3 className="text-xl font-semibold">Информация о товарах:</h3>
 
-            {/* Селектор выбора поставщика */}
+          
             <label htmlFor="supplier" className="block mt-4">Выберите поставщика:</label>
             <select
               id="supplier"
@@ -323,7 +323,7 @@ const CheckoutMain = () => {
                   const itemTotal = item.price * item.quantity;
                   return (
                     <li key={index} className="flex flex-wrap lg:gap-8 lg:border-none lg:p-0 gap-2 p-2  border-2 rounded border-gray-300 ">
-                      {/* Изображение товара */}
+                  
                       {item.image ? (
                         <ReactSVG
                           src={`data:image/svg+xml;utf8,${encodeURIComponent(item.image)}`}
@@ -349,7 +349,7 @@ const CheckoutMain = () => {
                 })}
             </ul>
 
-            {/* Итоговая сумма по корзине */}
+         
             <div className="mt-auto flex flex-col">
               <h3 className="text-lg font-bold">Итоговая сумма по корзине:</h3>
               <p>{totalPrice} {getCurrencySymbol(currency)}</p>

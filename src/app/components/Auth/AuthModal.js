@@ -19,7 +19,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [errors, setErrors] = useState({}); // Состояние для хранения ошибок
   const router = useRouter();
-  const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+  const csrfUrl = process.env.NEXT_PUBLIC_CSRF_URL;
 
 
 
@@ -87,7 +87,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
   };
 
   const registerUser = async () => {
-    const url = 'https://test.kimix.space/api/auth/register';
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/register`;
   
     try {
         await axios.get(csrfUrl, {
@@ -131,7 +131,7 @@ const Modal = ({ isOpen, toggleModal, isLoginMode, setIsLoginMode }) => {
   };
 
   const loginUser = async () => {
-    const loginUrl = 'https://test.kimix.space/api/auth/login';
+    const loginUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/login`;
     
 
   

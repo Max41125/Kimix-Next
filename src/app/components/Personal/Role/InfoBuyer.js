@@ -19,7 +19,7 @@ const InfoBuyer = ({ userId, userToken, userRole }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+  const csrfUrl = process.env.NEXT_PUBLIC_CSRF_URL;
   // Получение данных адреса пользователя
   useEffect(() => {
     const fetchUserAddress = async () => {
@@ -73,7 +73,7 @@ const InfoBuyer = ({ userId, userToken, userRole }) => {
 
     try {
       const response = await axios.post(
-        'https://test.kimix.space/api/user-address',
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user-address`,
         { ...formData, user_id: userId },
         {
           headers: { Authorization: `Bearer ${userToken}` },

@@ -9,7 +9,7 @@ const echo = new Echo({
   key: 'a511ccd3ff6dbde81a48',
   cluster: 'eu',
   forceTLS: true,
-  authEndpoint: 'https://test.kimix.space/broadcasting/auth',
+  authEndpoint: `${process.env.NEXT_PUBLIC_API_BASE_URL}/broadcasting/auth`,
 
 });
 

@@ -1,6 +1,6 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import userStore from '@/app/components/Auth/userStore'; // Импортируем MobX-хранилище
 import axios from 'axios';
 import Loader from '@/app/components/Loaders/Loader';
@@ -11,23 +11,25 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
     const [loading, setLoading] = useState(true); // Состояние загрузки данных пользователя
     const router = useRouter();
-    const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
-    
+    const csrfUrl = process.env.NEXT_PUBLIC_CSRF_URL;
+    const pathname = usePathname()
+
     useEffect(() => {
       if (typeof window !== 'undefined') {
+        
           const storedToken = localStorage.getItem('token');
           const cookies = parseCookies();  
           const rememberToken = cookies['remember_token'];
-          console.log(cookies);
+          //if (rememberToken && storedToken)
           // Проверка, если токен найден в localStorage
-          if (rememberToken && storedToken) {
+          if (storedToken) {
               userStore.setToken(storedToken); // Устанавливаем токен в MobX
 
               // Отправка CSRF запроса
               axios.get(csrfUrl, { withCredentials: true }).then(() => {
                   // После того как получили CSRF токен, проверяем есть ли данные пользователя в MobX
                   if (!userStore.user) {
-                      axios.get('https://test.kimix.space/api/user', {
+                      axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user`, {
                           headers: { Authorization: `Bearer ${storedToken}` },
                           withCredentials: true,
                           withXSRFToken: true,
@@ -45,8 +47,15 @@ export const UserProvider = ({ children }) => {
                   console.error('Error fetching CSRF token:', error);
                   setLoading(false); // Ошибка получения CSRF токена, меняем состояние
               });
-          } else {
-                
+          }
+
+          
+          else {
+
+            if (pathname.includes('/dashboard')) {
+                router.push('/auth');
+            }
+            
                 setLoading(false); // Если токен отсутствует, сразу меняем состояние
           }
       }
@@ -62,7 +71,7 @@ export const UserProvider = ({ children }) => {
 
     // Логаут: очищаем состояние в MobX и удаляем токен из localStorage
     const logout = async () => {
-        const url = 'https://test.kimix.space/api/auth/logout';
+        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/logout`;
         try {
             await axios.get(csrfUrl, { withCredentials: true });
             const response = await axios.post(

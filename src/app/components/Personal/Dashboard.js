@@ -56,7 +56,7 @@ const Dashboard = () => {
 
   return (
 <div className="flex lg:flex-row flex-col h-auto">
-      {/* Sidebar */}
+   
       <aside className="lg:w-64 w-full bg-gray-100 lg:h-screen z-50 sticky top-0">
         <div className="p-4 m-2 bg-white rounded-lg ">
           <h2 className="text-xl font-bold">Панель</h2>
@@ -103,9 +103,9 @@ const Dashboard = () => {
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 bg-gray-100 lg:p-6 p-2">
-        <h1 className="text-2xl font-bold mb-4">Добро пожаловать в ваш аккаунт!</h1>
+    
+      <main className="flex-1 bg-gray-100 lg:px-6 p-2">
+        
         {renderContent()}
       </main>
     </div>

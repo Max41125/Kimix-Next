@@ -58,7 +58,7 @@ const StatusLine = ({ status }) => {
 
           return (
             <React.Fragment key={item}>
-              {/* Линия слева от текущего статуса */}
+            
               {index > 0 && (
                 <div
                   className={`flex-1  ${
@@ -67,7 +67,7 @@ const StatusLine = ({ status }) => {
                 />
               )}
 
-              {/* Кружок статуса */}
+            
               <div className="relative z-10 flex flex-col items-center bg-transparent">
                 {isCurrent ? (
                     <div

@@ -59,7 +59,7 @@ const RussianContract = ({ orderId, currentDate }) => {
 
 
 
-    const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+    const csrfUrl = process.env.NEXT_PUBLIC_CSRF_URL;
   
     useEffect(() => {
         if (!user || !token || !orderId) return;
@@ -196,7 +196,7 @@ const RussianContract = ({ orderId, currentDate }) => {
         // Отправка контракта только для роли 'buyer'
         if (user.role === 'buyer') {
           const contractResponse = await axios.post(
-            'https://test.kimix.space/api/contract-orders',
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/contract-orders`,
             contractData,
             {
               headers: {

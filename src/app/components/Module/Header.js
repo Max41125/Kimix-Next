@@ -63,7 +63,7 @@ const Header = () => {
                 </button>
               </Link>
             )}
-          {/* Иконка пользователя */}
+      
           <div className="relative flex flex-col items-center">
             <button onClick={user ? handleDropdownToggle : null} className="text-teal-500">
               {user ? 
@@ -77,7 +77,7 @@ const Header = () => {
               }
             </button>
 
-            {/* Выпадающее меню для авторизованного пользователя */}
+          
             {user && isDropdownOpen && (
               <div className="fixed inset-y-0 h-screen z-20 right-0 bg-white shadow-md rounded-lg flex flex-col items-center  w-64 px-2 py-12">
 

@@ -7,7 +7,7 @@ const ResetPassword = () => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+  const csrfUrl = process.env.NEXT_PUBLIC_CSRF_URL;
   const handleReset = async (e) => {
     e.preventDefault();
     setError('');
@@ -20,7 +20,7 @@ const ResetPassword = () => {
 
         });
 
-        const response = await axios.post('https://test.kimix.space/api/auth/forgot-password', {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/forgot-password`, {
             email,
         }, {
        

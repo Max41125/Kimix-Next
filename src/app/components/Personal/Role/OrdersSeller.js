@@ -10,7 +10,7 @@ const OrdersSeller = ({ userId, userToken }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+  const csrfUrl = process.env.NEXT_PUBLIC_CSRF_URL;
 
 
 
@@ -67,7 +67,7 @@ const OrdersSeller = ({ userId, userToken }) => {
 
 
   return (
-    <div className="w-full my-8 p-4 bg-white shadow rounded-lg">
+    <div className="w-full p-4 bg-white shadow rounded-lg">
       <h2 className="text-2xl font-bold mb-6">Заказы покупателей</h2>
       {orders?.length > 0 ? (
         <ul className="space-y-4">

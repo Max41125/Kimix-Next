@@ -7,7 +7,7 @@ const UpdatePassword = ({ userToken, userEmail}) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+  const csrfUrl = process.env.NEXT_PUBLIC_CSRF_URL;
 
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
@@ -23,7 +23,7 @@ const UpdatePassword = ({ userToken, userEmail}) => {
 
 
       const response = await axios.post(
-        'https://test.kimix.space/api/auth/update-password',
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/update-password`,
         {
           email: userEmail,
           current_password: currentPassword,

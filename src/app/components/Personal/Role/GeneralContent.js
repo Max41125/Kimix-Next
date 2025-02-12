@@ -19,7 +19,9 @@ const GeneralContent = ({ userName, userEmail, userId, userToken, userRole, subs
   };
 
   return (
+    
     <div className="flex flex-col gap-4 p-4 border rounded-lg bg-white  mx-auto shadow-md">
+      <h1 className="text-2xl font-bold mb-4">Добро пожаловать в ваш аккаунт!</h1>
       <div className="flex items-center gap-4">
         <div className="relative w-24 h-24">
           <Image 

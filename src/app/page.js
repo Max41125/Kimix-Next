@@ -18,22 +18,22 @@ export default function Home() {
 
           </UserProvider>
           <div className="flex justify-center container mx-auto space-x-4 mt-10 px-2 z-10 lg:px-0 ">
-          {/* User Authentication Block */}
+          
           <Link href="/auth" className="flex flex-col bg-white items-center w-full  text-center  rounded-lg z-10  shadow-lg hover:bg-gray-100 transition duration-200">
-            <Image src={AuthIcon} width={200} height={100}  /> {/* Adjust size as needed */}
+            <Image src={AuthIcon} width={200} height={100}  />
             <span className="text-lg font-semibold py-8 mt-auto text-center">Вход в личный кабинет</span>
           </Link>
 
-          {/* Reagents Constructor Block */}
+          
           <Link href="/constructor" className="flex flex-col bg-white  items-center w-full rounded-lg shadow-lg z-10 hover:bg-gray-100 transition duration-200">
-            <Image src={ConstructorIcon} width={300} height={200} /> {/* Adjust size as needed */}
+            <Image src={ConstructorIcon} width={300} height={200} /> 
             <span className="text-lg font-semibold py-8 mt-auto text-center">Конструктор реагентов</span>
           </Link>
           </div>
 
           <div className="flex justify-center container mx-auto space-x-4 mt-10 px-2 lg:px-0 z-10">
           <Link href="/chemicals" className="flex flex-col bg-white  items-center w-full rounded-lg shadow-lg z-10 hover:bg-gray-100 transition duration-200">
-            <Image src={ConstructorIcon} width={300} height={200} /> {/* Adjust size as needed */}
+            <Image src={ConstructorIcon} width={300} height={200} />
             <span className="text-lg font-semibold py-8 mt-auto  text-center">Поиск товаров</span>
           </Link>
       

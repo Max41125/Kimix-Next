@@ -22,7 +22,7 @@ const LoginForm = () => {
   const [isRegistered, setIsRegistered] = useState(false); // Успешная регистрация
   const [errors, setErrors] = useState({}); // Состояние для хранения ошибок
   const [verificationMessage, setVerificationMessage] = useState(null); // Сообщение о подтверждении
-  const csrfUrl = 'https://test.kimix.space/sanctum/csrf-cookie';
+  const csrfUrl = process.env.NEXT_PUBLIC_CSRF_URL;
   const handleRoleChange = (selectedRole) => {
     setRole(selectedRole);
   };
@@ -77,7 +77,7 @@ const LoginForm = () => {
 
 
   const registerUser = async () => {
-    const url = 'https://test.kimix.space/api/auth/register';
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/register`;
   
     try {
         await axios.get(csrfUrl, {
@@ -123,7 +123,7 @@ const LoginForm = () => {
 
 
   const loginUser = async () => {
-    const loginUrl = 'https://test.kimix.space/api/auth/login';
+    const loginUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/login`;
     
     try {
         // Получаем CSRF-токен
@@ -325,7 +325,7 @@ const handleSwitchMode = (mode) => {
                     {errors.message && <p className="text-red-500 text-sm">{errors.message}</p>}
                 </form>
 
-                {/* Уведомление о подтверждении регистрации */}
+             
                 {isRegistered && (
                   <div className="mt-4 flex items-center text-green-600">
                     <CiCircleCheck className="w-6 h-6 mr-2" />
@@ -333,7 +333,7 @@ const handleSwitchMode = (mode) => {
                   </div>
                 )}
 
-                {/* Сообщение о подтверждении почты */}
+               
                 {verificationMessage && (
                   <div className="mt-4 flex items-center text-yellow-600">
                     <CiCircleCheck className="w-6 h-6 mr-2" />
