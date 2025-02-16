@@ -70,7 +70,7 @@ const EnglishContract = ({ orderId, currentDate }) => {
       
             // Fetch order details
             const responseOrder = await axios.get(
-              `https://test.kimix.space/api/user/order/${orderId}`,
+              `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/order/${orderId}`,
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -90,7 +90,7 @@ const EnglishContract = ({ orderId, currentDate }) => {
             if (supplierId) {
               // Fetch supplier details
               const responseSupplier = await axios.get(
-                `https://test.kimix.space/api/seller/${supplierId}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seller/${supplierId}`,
                 {
                   headers: {
                     Authorization: `Bearer ${token}`,
@@ -137,7 +137,7 @@ const EnglishContract = ({ orderId, currentDate }) => {
         };
         const fetchContractStatus = async () => {
           try {
-            const response = await axios.get(`https://test.kimix.space/api/orders/${orderId}/status`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/${orderId}/status`, {
               headers: { Authorization: `Bearer ${token}` },
               withCredentials: true,
               withXSRFToken:true,
@@ -220,7 +220,7 @@ const EnglishContract = ({ orderId, currentDate }) => {
         };
     
         const statusChangeResponse = await axios.patch(
-          `https://test.kimix.space/api/orders/${orderId}/status`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/${orderId}/status`,
           statusData,
           {
             headers: {

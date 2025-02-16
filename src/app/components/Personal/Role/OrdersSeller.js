@@ -21,7 +21,7 @@ const OrdersSeller = ({ userId, userToken }) => {
     const fetchOrders = async () => {
       try {
         await axios.get(csrfUrl, { withCredentials: true });
-        const response = await axios.get(`https://test.kimix.space/api/seller/${userId}/orders/`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seller/${userId}/orders/`, {
 
           headers: {
             Authorization: `Bearer ${userToken}`

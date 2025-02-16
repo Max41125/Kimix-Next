@@ -31,7 +31,7 @@ const InfoBuyer = ({ userId, userToken, userRole }) => {
       try {
         await axios.get(csrfUrl, { withCredentials: true });
         
-        const response = await axios.get(`https://test.kimix.space/api/user-address/${userId}`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user-address/${userId}`, {
           headers: { Authorization: `Bearer ${userToken}` },
           withCredentials: true,
           withXSRFToken:true,

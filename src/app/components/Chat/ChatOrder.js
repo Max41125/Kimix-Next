@@ -39,7 +39,7 @@ const ChatOrder = () => {
   
   const fetchDocuments = async () => {
     try {
-        const response = await axios.get(`https://test.kimix.space/api/auth/chat/documents/${orderId}`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/chat/documents/${orderId}`, {
             headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,
             withXSRFToken: true,
@@ -61,7 +61,7 @@ const ChatOrder = () => {
     const fetchOrder = async () => {
       try {
         await axios.get(csrfUrl, { withCredentials: true });
-        const response = await axios.get(`https://test.kimix.space/api/user/order/${orderId}`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/order/${orderId}`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
           withXSRFToken:true,
@@ -81,7 +81,7 @@ const ChatOrder = () => {
     };
     const fetchMessages = async () => {
       try {
-          const response = await axios.get(`https://test.kimix.space/api/auth/chat/messages/${orderId}`, {
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/chat/messages/${orderId}`, {
               headers: { Authorization: `Bearer ${token}` },
               withCredentials: true,
               withXSRFToken: true,
@@ -104,7 +104,7 @@ const ChatOrder = () => {
 
     const fetchContractStatus = async () => {
       try {
-        const response = await axios.get(`https://test.kimix.space/api/orders/${orderId}/status`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/${orderId}/status`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
           withXSRFToken:true,
@@ -276,7 +276,7 @@ const ChatOrder = () => {
         type: 'document',
         timestamp: doc.created_at,
         content: doc.filename,
-        filePath: `https://test.kimix.space${doc.path}`,
+        filePath: `${process.env.NEXT_PUBLIC_API_BASE_URL}${doc.path}`,
         isOwnMessage: doc.user_id === user.id,
     })),
 ];
@@ -377,7 +377,7 @@ const sortedItems = mergedMessagesAndDocs.sort((a, b) => {
             {documents.map((doc) => (
               <a
                 key={doc.id}
-                href={`https://test.kimix.space${doc.path}`}
+                href={`${process.env.NEXT_PUBLIC_API_BASE_URL}${doc.path}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline"

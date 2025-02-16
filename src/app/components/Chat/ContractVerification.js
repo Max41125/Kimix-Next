@@ -15,7 +15,7 @@ const ContractVerification = ({ userRole, userId, userToken, orderId, contractSt
       try {
         await axios.get(csrfUrl, { withCredentials: true });
 
-        const response = await axios.get(`https://test.kimix.space/api/contract-orders/${orderId}`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/contract-orders/${orderId}`, {
           headers: { Authorization: `Bearer ${userToken}` },
           withCredentials: true,
           withXSRFToken: true,

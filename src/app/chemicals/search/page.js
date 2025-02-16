@@ -16,7 +16,7 @@ const ChemicalDetail = ({ query }) => {
       if (!query) return;
 
       try {
-        const res = await fetch(`https://test.kimix.space/api/chemicals/search?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/chemicals/search?q=${encodeURIComponent(query)}`);
         if (!res.ok) {
           throw new Error(`Ошибка: ${res.status} ${res.statusText}`);
         }

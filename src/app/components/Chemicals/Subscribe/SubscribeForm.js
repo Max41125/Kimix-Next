@@ -1,52 +1,66 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Loader from '../../Loaders/Loader';
 
-const SubscriptionForm = ({ userId, chemicalId, role }) => {
+const SubscriptionForm = ({ userId, chemicalId, role, setSubscription }) => {
     const [type, setType] = useState(role);
-    const [subscription, setSubscription] = useState(null);
+    const [subscription, setLocalSubscription] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [hasSuppliers, setHasSuppliers] = useState(false); // Добавляем состояние
 
     useEffect(() => {
+        if (!userId || !chemicalId) return;
+
+        const fetchChemicalSuppliers = async () => {
+            try {
+                const response = await axios.get(
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/chemicals/${chemicalId}/suppliers`,
+                    { withCredentials: true }
+                );
+                setHasSuppliers(response.data.has_suppliers); // Устанавливаем флаг
+            } catch (err) {
+                setError(err.message);
+            } 
+        };
+
         const fetchSubscription = async () => {
-            if (!userId || !chemicalId) return;
-    
             try {
                 const response = await axios.get(
                     `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/subscriptions/${userId}`,
                     { withCredentials: true }
                 );
-                
+
                 if (response.status === 204) {
-                    setSubscription(null); // Если подписка не найдена, то обнуляем subscription
+                    setLocalSubscription(null);
+                    setSubscription(null);
                     return;
                 }
-    
+
                 const activeSubscription = response.data.find(sub => 
                     sub.chemical_id === chemicalId && new Date(sub.end_date) > new Date()
                 );
-    
+                setLocalSubscription(activeSubscription || null);
                 setSubscription(activeSubscription || null);
-                console.log(activeSubscription);
             } catch (err) {
                 setError(err.message);
             } finally {
                 setLoading(false);
             }
         };
-    
+
+        fetchChemicalSuppliers();
         fetchSubscription();
     }, [userId, chemicalId]);
-    
 
     if (loading) return <Loader />;
     if (error) return <p className="text-red-500">Ошибка: {error}</p>;
 
+    // Если нет поставщиков, скрываем подписку
+    if (!hasSuppliers) return null;
+
     // Если подписка активна, показываем сообщение
-    if (subscription && subscription.chemical_id === chemicalId && new Date(subscription.end_date).getTime() > new Date().getTime()) {
+    if (subscription && new Date(subscription.end_date).getTime() > new Date().getTime()) {
         return (
             <div className="w-full bg-green-100 p-4 rounded-lg shadow-md text-center">
                 <h3 className="text-xl font-semibold text-green-700">Подписка активна на это вещество</h3>
@@ -54,7 +68,6 @@ const SubscriptionForm = ({ userId, chemicalId, role }) => {
             </div>
         );
     }
-    
 
     const handleSubscribe = async (selectedDuration) => {
         try {
@@ -78,21 +91,18 @@ const SubscriptionForm = ({ userId, chemicalId, role }) => {
     return (
         <div className="w-full">
             <div className="flex flex-col lg:flex-row gap-2 w-full">
-               
                 <SubscriptionCard
                     title="LITE"
                     price="1500р"
                     features={["✅ 6 мес.", "✅ Lorem ipsum", "✅ Lorem ipsum"]}
                     onSubscribe={() => handleSubscribe('6 months')}
                 />
-           
                 <SubscriptionCard
                     title="MEDIUM"
                     price="1900р"
                     features={["✅ 1 год", "✅ Lorem ipsum", "✅ Lorem ipsum"]}
                     onSubscribe={() => handleSubscribe('1 year')}
                 />
-            
                 <SubscriptionCard
                     title="PRO"
                     price="2500р"

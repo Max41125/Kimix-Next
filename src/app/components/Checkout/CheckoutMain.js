@@ -31,7 +31,7 @@ const CheckoutMain = () => {
 
   const [suppliers, setSuppliers] = useState([]);
   const [selectedSupplier, setSelectedSupplier] = useState('');
-  const BuyerApiUrl = `https://test.kimix.space/api/user-address`; // Обновить URL
+  const BuyerApiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user-address`; // Обновить URL
   useEffect(() => {
     if (cart.length > 0) {
       const uniqueSuppliers = [...new Set(cart.map(item => item.supplier))];

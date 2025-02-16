@@ -22,7 +22,7 @@ const SellerContent = ({ userId, userToken }) => {
   useEffect(() => {
     const fetchUserProducts = async () => {
       try {
-        const response = await axios.get(`https://test.kimix.space/api/users/${userId}/products`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${userId}/products`, {
           headers: {
             Authorization: `Bearer ${userToken}` // Включаем токен в заголовок
           }
@@ -62,7 +62,7 @@ const SellerContent = ({ userId, userToken }) => {
   const searchProducts = async (query) => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`https://test.kimix.space/api/chemicals/search?q=${query}`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/chemicals/search?q=${query}`);
       setHasSearched(true); // Устанавливаем hasSearched в true после первого запроса
       if (response.data.length === 0) {
         setChemicals([]); // Сохраняем пустой массив, если ничего не найдено
@@ -113,7 +113,7 @@ const SellerContent = ({ userId, userToken }) => {
       await axios.get(csrfUrl, {
         withCredentials: true,
       });
-      await axios.delete(`https://test.kimix.space/api/users/${userId}/products`, {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${userId}/products`, {
         data: { products: [productId] },
         headers: {
           Authorization: `Bearer ${userToken}`
@@ -137,7 +137,7 @@ const SellerContent = ({ userId, userToken }) => {
         description: product.description,
       }));
       await axios.get(csrfUrl, { withCredentials: true });
-      await axios.put(`https://test.kimix.space/api/users/${userId}/products`, 
+      await axios.put(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${userId}/products`, 
         { products: productIds },
         {
           headers: { Authorization: `Bearer ${userToken}` },
@@ -151,7 +151,7 @@ const SellerContent = ({ userId, userToken }) => {
       setProductPrices({});
       setCurrencyUnits({});
       
-      const response = await axios.get(`https://test.kimix.space/api/users/${userId}/products`, {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${userId}/products`, {
         headers: {
           Authorization: `Bearer ${userToken}`
         }

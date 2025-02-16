@@ -15,7 +15,7 @@ const ContractPayment = ({ userRole, supplierId, userToken, orderId}) => {
 
       try {
         const responseSupplier = await axios.get(
-          `https://test.kimix.space/api/seller/${supplierId}`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seller/${supplierId}`,
           {
             headers: {
               Authorization: `Bearer ${userToken}`,
@@ -49,7 +49,7 @@ const ContractPayment = ({ userRole, supplierId, userToken, orderId}) => {
 
   
       const statusChangeResponse = await axios.patch(
-        `https://test.kimix.space/api/orders/${orderId}/status`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/${orderId}/status`,
 
         { status: "packing" },
         {

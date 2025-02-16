@@ -31,7 +31,7 @@ const InfoSeller = ({ userId, userToken, userRole }) => {
     const [error, setError] = useState(null);
   // URL API для работы с данными продавца
   const csrfUrl = process.env.NEXT_PUBLIC_CSRF_URL;
-  const sellerApiUrl = `https://test.kimix.space/api/seller`; // Обновить URL
+  const sellerApiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seller`; // Обновить URL
 
   // Запросы выполняются только если userRole === "seller"
   useEffect(() => {

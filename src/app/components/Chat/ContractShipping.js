@@ -28,7 +28,7 @@ const ContractShipping = ({ userToken, orderId, currentStatus }) => {
 
     try {
       const response = await axios.patch(
-        `https://test.kimix.space/api/orders/${orderId}/status`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/${orderId}/status`,
         { status: selectedStatus },
         {
           headers: {
