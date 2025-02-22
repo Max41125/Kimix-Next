@@ -13,9 +13,6 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 
 const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
-
-    if (!subscription) return null;
-
     const [suppliers, setSuppliers] = useState([]);
     const { addToCart, cart } = useCart();
     const [isAdded, setIsAdded] = useState({});
@@ -24,6 +21,9 @@ const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
 
     const navigationNextRef = useRef(null);
     const navigationPrevRef = useRef(null);
+
+    if (!subscription) return null;
+
 
     useEffect(() => {
         const fetchChemical = async () => {
