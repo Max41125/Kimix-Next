@@ -2,27 +2,17 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Loader from '../../Loaders/Loader';
 
-const SubscriptionForm = ({ userId, chemicalId, role, setSubscription }) => {
+const SubscriptionForm = ({ userId, chemicalId, role, setSubscription, has}) => {
     const [type, setType] = useState(role);
     const [subscription, setLocalSubscription] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [hasSuppliers, setHasSuppliers] = useState(false); // Добавляем состояние
+    
 
     useEffect(() => {
         if (!userId || !chemicalId) return;
 
-        const fetchChemicalSuppliers = async () => {
-            try {
-                const response = await axios.get(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/chemicals/${chemicalId}/suppliers`,
-                    { withCredentials: true }
-                );
-                setHasSuppliers(response.data.has_suppliers); // Устанавливаем флаг
-            } catch (err) {
-                setError(err.message);
-            } 
-        };
+
 
         const fetchSubscription = async () => {
             try {
@@ -49,15 +39,13 @@ const SubscriptionForm = ({ userId, chemicalId, role, setSubscription }) => {
             }
         };
 
-        fetchChemicalSuppliers();
+    
         fetchSubscription();
     }, [userId, chemicalId]);
 
     if (loading) return <Loader />;
     if (error) return <p className="text-red-500">Ошибка: {error}</p>;
 
-    // Если нет поставщиков, скрываем подписку
-    if (!hasSuppliers) return null;
 
     // Если подписка активна, показываем сообщение
     if (subscription && new Date(subscription.end_date).getTime() > new Date().getTime()) {

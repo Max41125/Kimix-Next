@@ -30,7 +30,7 @@ const ChemicalProduct = () => {
     const [openSynonyms, setOpenSynonyms] = useState(false);
     const [openInchi, setOpenInchi] = useState(false);
     const [openSmiles, setOpenSmiles] = useState(false);
-
+    const [hasSuppliers, setHasSuppliers] = useState(false); // Добавляем состояние
     const { user } = useUser() || {};
   
     useEffect(() => {
@@ -49,18 +49,25 @@ const ChemicalProduct = () => {
           setLoading(false);
         }
       };
-  
+
+      const fetchChemicalSuppliers = async () => {
+        try {
+            const response = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/chemicals/${id}/suppliers`,
+                { withCredentials: true }
+            );
+            setHasSuppliers(response.data.has_suppliers); // Устанавливаем флаг
+        } catch (err) {
+            setError(err.message);
+        } 
+      };
+      fetchChemicalSuppliers();
+
       fetchChemical();
     }, [id]);
   
 
-    const handleQuantityChange = (supplierId, value) => {
-      setQuantities((prevQuantities) => ({
-        ...prevQuantities,
-        [supplierId]: value,
-      }));
-    };
-  
+
     if (loading) return <Loader />;
     if (error) return <div>Ошибка: {error}</div>;
     if (!chemical) return <div>Нет данных для отображения.</div>;
@@ -105,34 +112,33 @@ const ChemicalProduct = () => {
            
             </div>
           </div>
-                  
-          {user?.role === 'buyer' ? (
-            
-            <>
-              <div className='w-full border rounded-lg my-5 bg-white shadow-lg'>
-
-                <SubscriptionForm 
-                userId={user.id}
-                chemicalId={chemical.id}
-                role={user.role}
-                setSubscription={setSubscription}/>
-
-                <SubscribeSliderChemical chemical={chemical} subscription={subscription} userId={user.id} />
-
-              </div>
-            </>
-          ) : (
-            <BlurredContent role="buyer">
-              {suppliers?.map((supplier) => (
-                <div key={supplier.id} className="p-4 mt-2 bg-gray-100 rounded-lg shadow-md grid grid-cols-2">
-                  <div className="flex flex-col gap-4">
-                    <p> Lorem ipsum Lorem ipsum Lorem ipsum </p>
-                    <p>Lorem ipsum Lorem ipsum</p>
-                  </div>
+          {hasSuppliers !== false && (
+            user?.role === 'buyer' ? (
+                <div className='w-full border rounded-lg my-5 bg-white shadow-lg'>
+                    <SubscriptionForm 
+                        userId={user.id}
+                        chemicalId={chemical.id}
+                        role={user.role}
+                        setSubscription={setSubscription}
+                    />
+                    <SubscribeSliderChemical 
+                        chemical={chemical} 
+                        subscription={subscription} 
+                        userId={user.id} 
+                    />
                 </div>
-              ))}
-            </BlurredContent>
-          )}
+            ) : (
+                <BlurredContent role="buyer">
+                    <div className="p-4 mt-2 bg-gray-100 rounded-lg shadow-md grid grid-cols-2">
+                        <div className="flex flex-col gap-4">
+                            <p>Lorem ipsum Lorem ipsum Lorem ipsum</p>
+                            <p>Lorem ipsum Lorem ipsum</p>
+                        </div>
+                    </div>
+                </BlurredContent>
+            )
+        )}
+
   
                
             

@@ -44,7 +44,7 @@ const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
 
         fetchChemical();
     }, [subscription, userId]);
-
+    if (!subscription || !subscription.chemical_id || !userId) return;
     // Пока данные загружаются, отображаем лоадер
     if (loading) {
         return <Circle />;
