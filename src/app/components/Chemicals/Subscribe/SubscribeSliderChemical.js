@@ -22,7 +22,7 @@ const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
     const navigationNextRef = useRef(null);
     const navigationPrevRef = useRef(null);
 
-    if (!subscription) return null;
+    
 
 
     useEffect(() => {
@@ -40,7 +40,7 @@ const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
         };
 
         fetchChemical();
-    }, [subscription.chemical_id]);
+    }, [subscription.chemical_id, userId]);
 
     // Пока данные загружаются, отображаем лоадер
     if (loading) {
