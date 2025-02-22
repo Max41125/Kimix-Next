@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { HiChevronLeft, HiChevronRight } from 'react-icons/hi';
 import { CiCircleCheck } from 'react-icons/ci';
 import { useCart } from '../../Cart/CartProvider';
-import Circle from '../../Loaders/Circle';  // Импорт лоадера
+import Circle from '../../Loaders/Circle';  
 import { Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -45,12 +45,11 @@ const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
         fetchChemical();
     }, [subscription, userId]);
     if (!subscription || !subscription.chemical_id || !userId) return;
-    // Пока данные загружаются, отображаем лоадер
+
     if (loading) {
         return <Circle />;
     }
 
-    // Если поставщики не найдены, показываем сообщение
     if (suppliers.length === 0) {
         return <p>Нет доступных поставщиков</p>;
     }
@@ -67,17 +66,15 @@ const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
             price: supplier.price,
             currency: supplier.currency,
             unit_type: supplier.unit_type,
-            quantity,  // Передаем количество
+            quantity,  
         };
         console.log(quantities[supplier.uniqueKey]);
-        // Добавляем товар в корзину
+
         addToCart(newItem);
         
-        // Обновляем состояние кнопки (отображение "В корзине")
-        // Обновляем состояние кнопки (отображение "В корзине")
+     
         setIsAdded((prev) => ({ ...prev, [uniqueKey]: true }));
 
-        // Ожидаем 2 секунды, чтобы показать изменение на кнопке
         setTimeout(() => {
             setIsAdded((prev) => ({ ...prev, [uniqueKey]: false }));
         }, 2000);
@@ -90,13 +87,13 @@ const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
                 ...prevQuantities,
                 [supplierKey]: Number(value),
             };
-            console.log(newQuantities); // Теперь логи будут показывать актуальное состояние
+            console.log(newQuantities); 
             return newQuantities;
         });
     };
     
 
-    // Функция для отображения символов валют
+ 
     const getCurrencySymbol = (currency) => {
         switch (currency) {
             case 'RUB': return '₽';
@@ -107,7 +104,6 @@ const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
         }
     };
 
-    // Функция для перевода единиц измерения на русский
     const translateUnitType = (unitType) => {
         switch (unitType) {
             case 'grams': return 'Гр.';
