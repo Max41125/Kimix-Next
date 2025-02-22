@@ -22,15 +22,18 @@ const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
     const navigationNextRef = useRef(null);
     const navigationPrevRef = useRef(null);
 
-    
+
 
 
     useEffect(() => {
-        const fetchChemical = async () => {
-            if (!subscription.chemical_id) return;
+        if (!subscription || !subscription.chemical_id || !userId) return;
 
+        const fetchChemical = async () => {
             try {
-                const supplierRes = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/chemicals/${subscription.chemical_id}/suppliers/${userId}`, { withCredentials: true });
+                const supplierRes = await axios.get(
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/chemicals/${subscription.chemical_id}/suppliers/${userId}`, 
+                    { withCredentials: true }
+                );
                 setSuppliers(supplierRes.data);
             } catch (err) {
                 console.error(err);
@@ -40,7 +43,7 @@ const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
         };
 
         fetchChemical();
-    }, [subscription.chemical_id, userId]);
+    }, [subscription, userId]);
 
     // Пока данные загружаются, отображаем лоадер
     if (loading) {
