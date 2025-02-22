@@ -1,17 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef} from 'react';
 import axios from 'axios';
+import shopSvg from '/public/shop.svg';
+import Image from 'next/image';
 import { HiChevronLeft, HiChevronRight } from 'react-icons/hi';
 import { CiCircleCheck } from 'react-icons/ci';
 import { useCart } from '../../Cart/CartProvider';
 import Circle from '../../Loaders/Circle';  // Импорт лоадера
-import SwiperCore, { Navigation, Pagination, EffectFade } from 'swiper';
+import { Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
-
-// Инициализация Swiper с необходимыми модулями
-SwiperCore.use([Navigation, Pagination, EffectFade]);
 
 const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
 
@@ -22,6 +21,9 @@ const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
     const [isAdded, setIsAdded] = useState({});
     const [loading, setLoading] = useState(true);
     const [quantities, setQuantities] = useState({}); 
+
+    const navigationNextRef = useRef(null);
+    const navigationPrevRef = useRef(null);
 
     useEffect(() => {
         const fetchChemical = async () => {
@@ -51,7 +53,8 @@ const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
     }
 
     const handleAddToCart = (supplier) => {
-        const quantity = quantities[supplier.id] || 1; // Используем выбранное количество
+        const uniqueKey = getUniqueKey(supplier);  
+        const quantity = quantities[uniqueKey] || 1;
         const newItem = {
             id: chemical.id,
             title: chemical.title,
@@ -63,19 +66,32 @@ const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
             unit_type: supplier.unit_type,
             quantity,  // Передаем количество
         };
+        console.log(quantities[supplier.uniqueKey]);
+        // Добавляем товар в корзину
         addToCart(newItem);
-        setIsAdded((prev) => ({ ...prev, [supplier.id]: true }));
+        
+        // Обновляем состояние кнопки (отображение "В корзине")
+        // Обновляем состояние кнопки (отображение "В корзине")
+        setIsAdded((prev) => ({ ...prev, [uniqueKey]: true }));
+
+        // Ожидаем 2 секунды, чтобы показать изменение на кнопке
         setTimeout(() => {
-          setIsAdded((prev) => ({ ...prev, [supplier.id]: false }));
+            setIsAdded((prev) => ({ ...prev, [uniqueKey]: false }));
         }, 2000);
     };
+    
 
-    const handleQuantityChange = (supplierId, value) => {
-        setQuantities((prevQuantities) => ({
-          ...prevQuantities,
-          [supplierId]: value,
-        }));
+    const handleQuantityChange = (supplierKey, value) => {
+        setQuantities((prevQuantities) => {
+            const newQuantities = {
+                ...prevQuantities,
+                [supplierKey]: Number(value),
+            };
+            console.log(newQuantities); // Теперь логи будут показывать актуальное состояние
+            return newQuantities;
+        });
     };
+    
 
     // Функция для отображения символов валют
     const getCurrencySymbol = (currency) => {
@@ -98,56 +114,80 @@ const SubscribeSliderChemical = ({ chemical, subscription, userId }) => {
             default: return unitType;
         }
     };
-
+    const getUniqueKey = (supplier) => `${supplier.id}-${supplier.unit_type}-${supplier.currency}`;
     return (
-        <div className="relative w-full mx-auto my-4 overflow-hidden">
+        <div className="relative w-full mx-auto my-4 p-10 ">
             <Swiper
                 spaceBetween={10}
-                slidesPerView={2}
+                slidesPerView={3}
+                modules={[Navigation]}
                 navigation={{
-                    prevEl: '.swiper-button-prev',
-                    nextEl: '.swiper-button-next',
+                    prevEl: navigationPrevRef.current,
+                    nextEl: navigationNextRef.current,
                 }}
+                className='flex'
                 loop={true}
+
+ 
+
             >
-                {suppliers.map((supplier) => (
-                    <SwiperSlide key={supplier.id}>
-                        <div className="p-6 bg-white rounded-lg shadow-lg text-center flex flex-col items-center">
-                            <h3 className="text-lg font-bold">Поставщик: {supplier.name}</h3>
-                            <p className="text-gray-700">Цена: {supplier.price} {getCurrencySymbol(supplier.currency)}/{translateUnitType(supplier.unit_type)}</p>
-                            <div className="flex gap-2 justify-center relative items-center lg:flex-row flex-col">
-                              <input
-                                type="number"
-                                min="1"
-                                value={quantities[supplier.id] || 1}
-                                onChange={(e) => handleQuantityChange(supplier.id, e.target.value)}
-                                className="lg:w-16 w-full p-2 border rounded"
-                              />
-                           </div>
-                            <button
-                                onClick={() => handleAddToCart(supplier)}
-                                className={`mt-4 px-4 py-2 rounded text-white transition-colors ${
-                                    isAdded[supplier.id] ? 'bg-green-500' : 'bg-blue-500 hover:bg-blue-600'
-                                }`}
-                            >
-                                {isAdded[supplier.id] ? (
-                                    <span className="flex items-center gap-2"><CiCircleCheck size={20} /> В корзине</span>
-                                ) : (
-                                    'Добавить в корзину'
-                                )}
-                            </button>
+            {suppliers.map((supplier) => {
+                const uniqueKey = getUniqueKey(supplier);
+                return (
+                    <SwiperSlide key={uniqueKey} className='!h-auto flex flex-col'>
+                        <div className="p-5 bg-white rounded-3xl border-2 border-gray-200 flex flex-col h-full">
+                            <div className='flex flex-row justify-between mb-3'>
+                                <div className='flex flex-row gap-4'>
+                                    <Image
+                                        src={shopSvg}
+                                        width={33}
+                                        height={33}
+                                    />
+                                    <h3 className="text-lg font-bold">{supplier.name}</h3>
+                                </div>
+                                <p className="text-lg font-bold">{supplier.price} {getCurrencySymbol(supplier.currency)}/{translateUnitType(supplier.unit_type)}</p>
+                            </div>
+
+                            <p className='mb-3 text-lg text-gray-500'>{supplier.description}</p>
+
+                            <div className='flex flex-row gap-3 items-center justify-end mt-auto'>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={quantities[uniqueKey] || 1}
+                                    onChange={(e) => handleQuantityChange(uniqueKey, Number(e.target.value))}
+
+                                    className="lg:w-16 w-full p-2 border rounded"
+                                />
+                                <button
+                                    onClick={() => handleAddToCart(supplier)}
+                                    className={`px-4 py-2 rounded text-white transition-colors ${
+                                        isAdded[uniqueKey] ? 'bg-green-500' : 'bg-green-500 hover:bg-green-600'
+                                    }`}
+                                >
+                                    {isAdded[uniqueKey] ? (
+                                        <span className="flex items-center gap-2"><CiCircleCheck size={20} /> В корзине</span>
+                                    ) : (
+                                        'Добавить в корзину'
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </SwiperSlide>
-                ))}
+                );
+            })}
+
+
+
             </Swiper>
 
-            {/* Кнопки навигации */}
-            <button className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-200 p-2 rounded-full shadow-md swiper-button-prev">
+            <button ref={navigationPrevRef}  className="z-10 absolute left-[20px] top-1/2 transform -translate-y-1/2 bg-gray-200 p-2 rounded-full shadow-md swiper-button-prev">
                 <HiChevronLeft size={24} />
             </button>
-            <button className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-200 p-2 rounded-full shadow-md swiper-button-next">
+            <button ref={navigationNextRef} className="z-10 absolute right-[20px] top-1/2 transform -translate-y-1/2 bg-gray-200 p-2 rounded-full shadow-md swiper-button-next">
                 <HiChevronRight size={24} />
             </button>
+
         </div>
     );
 };
