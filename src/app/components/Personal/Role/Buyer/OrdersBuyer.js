@@ -64,6 +64,25 @@ const BuyerContent = ({ userId, userToken }) => {
 
   };
 
+  const getCurrencySymbol = (currency) => {
+    switch (currency) {
+        case 'RUB': return '₽';
+        case 'USD': return '$';
+        case 'EUR': return '€';
+        case 'CNY': return '¥';
+        default: return currency;
+    }
+};
+
+const translateUnitType = (unitType) => {
+    switch (unitType) {
+        case 'grams': return 'Гр.';
+        case 'kilograms': return 'Кг.';
+        case 'tons': return 'Т.';
+        case 'pieces': return 'Шт.';
+        default: return unitType;
+    }
+};
   return (
     <div className="w-full my-8 p-4 bg-white shadow rounded-lg">
       <h2 className="text-2xl font-bold mb-6">Ваши заказы</h2>
@@ -79,6 +98,13 @@ const BuyerContent = ({ userId, userToken }) => {
                   <div className="mb-2">
                     <span className="font-semibold">Общая сумма:</span> {order.total_price} {order.currency}
                   </div>
+                  <div className="mb-2">
+                    <span className="font-semibold">Количество:</span>{" "}
+                    {order.products.map((product, index) => (
+                      <span key={index}>{product.pivot.quantity} {translateUnitType(product.pivot.unit_type)}</span>
+                    ))}
+                  </div>
+
                   <div className="mb-4">
                     <span className="font-semibold">Дата создания:</span> {new Date(order.created_at).toLocaleDateString()}
                   </div>

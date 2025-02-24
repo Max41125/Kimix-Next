@@ -97,6 +97,7 @@ const CheckoutMain = () => {
       user_id: user.id,  // ID пользователя
       products: supplierItems.map(item => ({
         id: item.id,
+        product_id: item.product_id,
         supplier_id: item.supplier_id,
         quantity: item.quantity,
         unit_type: item.unit_type,
