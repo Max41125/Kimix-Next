@@ -3,13 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../Auth/UserProvider'; 
 import { useRouter } from 'next/navigation'; 
-import OrdersBuyer from '@/app/components/Personal/Role/OrdersBuyer'; 
-import StudentContent from '@/app/components/Personal/Role/StudentContent'; 
-import AddProductSeller from '@/app/components/Personal/Role/AddProductSeller'; 
+import OrdersBuyer from '@/app/components/Personal/Role/Buyer/OrdersBuyer'; 
+import StudentContent from '@/app/components/Personal/Role/Student/StudentContent'; 
+import AddProductSeller from '@/app/components/Personal/Role/Seller/AddProductSeller'; 
 import GeneralContent from '@/app/components/Personal/Role/GeneralContent';
-import OrdersSeller from '@/app/components/Personal/Role/OrdersSeller';
+import OrdersSeller from '@/app/components/Personal/Role/Seller/OrdersSeller';
+import Subscriptions from '@/app/components/Personal/Role/Subscriptions';
 import {useSearchParams } from 'next/navigation'
 import Loader from '../Loaders/Loader';
+import axios from 'axios';
 
 const Dashboard = () => {
   const { user, token } = useUser();
@@ -17,17 +19,49 @@ const Dashboard = () => {
   const router = useRouter();  // Создаем роутер
   const [activeSection, setActiveSection] = useState('general');  // Инициализируем состояние с дефолтным значением
   const searchParams = useSearchParams();
+  const [subscription, setSubscription] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const sectionFromUrl = searchParams.get('section');  // Извлекаем параметр 'section' из URL
+    const sectionFromUrl = searchParams.get('section');  
     if (sectionFromUrl) {
-      setActiveSection(sectionFromUrl);  // Обновляем состояние, если параметр 'section' существует
+      setActiveSection(sectionFromUrl);
     }
-  }, [searchParams]);  // Перезапускаем эффект при изменении параметров
+
+    if (!user.id) return;
+
+    const fetchSubscription = async () => {
+        try {
+            const response = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/subscriptions/${user.id}`,
+                { withCredentials: true }
+            );
+
+            if (response.status === 204) {
+                setSubscription([]); // Делаем пустым массивом, а не null
+                return;
+            }
+
+            
+            const activeSubscriptions = response.data.filter(sub => new Date(sub.end_date) > new Date());
+            setSubscription(activeSubscriptions); // Сохраняем массив
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchSubscription();
+}, [searchParams, user.id]);
+
 
   if (!user) {
     return <Loader />;
   }
+  if (loading) return <Loader />;
+  if (error) return <p className="text-red-500">Ошибка: {error}</p>;
 
   const handleSectionChange = (section) => {
     setActiveSection(section);
@@ -39,7 +73,8 @@ const Dashboard = () => {
   const renderContent = () => {
     switch (activeSection) {
       case 'general':
-        return <GeneralContent userId={user.id} userToken={token} userName={user.name} userEmail={user.email} userRole={user.role} />;
+        return <GeneralContent userId={user.id} userToken={token} userName={user.name} 
+        userEmail={user.email} userRole={user.role} subscription={subscription} />;
       case 'сustomer-orders':
         return <OrdersBuyer userId={user.id} userToken={token} />;
       case 'student-info':
@@ -48,6 +83,8 @@ const Dashboard = () => {
         return <AddProductSeller userId={user.id} userToken={token} />;
       case 'seller-orders':
         return <OrdersSeller userId={user.id} userToken={token} />;
+      case 'customer-subscriptions':
+        return <Subscriptions subscription={subscription} />;
       default:
         return <div>Выберите раздел</div>;
     }
@@ -66,6 +103,12 @@ const Dashboard = () => {
               onClick={() => handleSectionChange('general')}
             >
               Общая информация
+            </li>
+            <li
+              className={`p-2 hover:bg-gray-100 rounded-lg transition cursor-pointer ${activeSection === 'customer-subscriptions' ? 'bg-gray-200' : ''}`}
+              onClick={() => handleSectionChange('customer-subscriptions')}
+            >
+              Подписки
             </li>
             {user.role === 'buyer' && (
               <li

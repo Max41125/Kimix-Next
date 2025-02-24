@@ -4,7 +4,7 @@ import { ReactSVG } from 'react-svg';
 import NotFound from '/public/notfound.svg';
 import Link from 'next/link';
 import Image from 'next/image';
-import Loader from '../../Loaders/Circle';
+import Loader from '../../../Loaders/Circle';
 
 const OrdersSeller = ({ userId, userToken }) => {
   const [orders, setOrders] = useState([]);

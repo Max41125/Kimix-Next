@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+'use client';
 
-import InfoSeller from '@/app/components/Personal/Role/InfoSeller';
-import InfoBuyer from '@/app/components/Personal/Role/InfoBuyer';
+
+import React, { useState} from 'react';
+
+import InfoSeller from '@/app/components/Personal/Role/Seller/InfoSeller';
+import InfoBuyer from '@/app/components/Personal/Role/Buyer/InfoBuyer';
 import UpdatePassword from '@/app/components/Auth/UpdatePassword';
 import User from '/public/user.webp'
 import { FaCirclePlus } from "react-icons/fa6";
@@ -17,7 +20,7 @@ const GeneralContent = ({ userName, userEmail, userId, userToken, userRole, subs
       setProfileImage(URL.createObjectURL(file));
     }
   };
-
+  
   return (
     
     <div className="flex flex-col gap-4 p-4 border rounded-lg bg-white  mx-auto shadow-md">
@@ -44,7 +47,10 @@ const GeneralContent = ({ userName, userEmail, userId, userToken, userRole, subs
    
         <div className="flex flex-col items-start gap-1">
           <p className="text-sm font-medium">Роль: <b>{userRole === 'seller' ? 'Продавец' : 'Покупатель'}</b></p>
-          <p className="text-sm font-medium">Подписка: <b>{subscription || 'Нет подписки'}</b></p>
+          <p className="text-sm font-medium">
+           <b>{subscription ? `Активных подписок: ${subscription.length}` : 'Нет подписки'}</b>
+          </p>
+
          
           <p className="text-sm font-medium"> ФИО: <b>{userName}</b></p>
           <p className="text-sm font-medium">Email: <b>{userEmail}</b></p>

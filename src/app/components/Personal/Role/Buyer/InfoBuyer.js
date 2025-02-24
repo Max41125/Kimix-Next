@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Loader from '../../Loaders/Circle';
+import Loader from '../../../Loaders/Circle';
 const InfoBuyer = ({ userId, userToken, userRole }) => {
   const [formData, setFormData] = useState({
     name: '',
